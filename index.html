@@ -1,0 +1,2523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Maglev Express - Edición Insuperable</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #010308;
+            height: 100vh;
+            height: 100dvh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #ffffff;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #btn-inicio {
+            padding: 20px 55px;
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            font-weight: bold;
+            color: #ffffff;
+            background: rgba(0, 30, 45, 0.85);
+            border: 2px solid #00f0ff;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 35px rgba(0, 240, 255, 0.5);
+            z-index: 40;
+            letter-spacing: 2px;
+        }
+
+        #btn-inicio:hover {
+            background-color: #00f0ff;
+            color: #000000;
+            box-shadow: 0 0 50px rgba(0, 240, 255, 0.95);
+            transform: scale(1.06);
+        }
+
+        /* Botones superiores compactos */
+        .controles-sup {
+            display: none;
+            position: fixed;
+            top: 10px;
+            right: 12px;
+            gap: 5px;
+            z-index: 50;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            max-width: calc(100vw - 360px);
+        }
+
+        .btn-sup {
+            padding: 6px 9px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #e2f8ff;
+            background: rgba(2, 12, 24, 0.88);
+            border: 1px solid rgba(0, 240, 255, 0.45);
+            border-radius: 18px;
+            backdrop-filter: blur(6px);
+            cursor: pointer;
+            transition: all 0.18s ease;
+            line-height: 1.15;
+            white-space: nowrap;
+        }
+
+        .btn-sup:hover {
+            background: #00f0ff;
+            color: #000000;
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.75);
+        }
+
+        .btn-sup.activo-modo {
+            background: rgba(57, 255, 20, 0.22);
+            border-color: #39ff14;
+            color: #39ff14;
+            box-shadow: 0 0 12px rgba(57, 255, 20, 0.35);
+        }
+
+        .btn-sup.modo-expreso {
+            background: rgba(255, 0, 127, 0.24);
+            border-color: #ff007f;
+            color: #ff66b2;
+            box-shadow: 0 0 12px rgba(255, 0, 127, 0.35);
+        }
+
+        .btn-sup.modo-cabina {
+            background: rgba(255, 230, 0, 0.22);
+            border-color: #ffe600;
+            color: #ffe600;
+            box-shadow: 0 0 12px rgba(255, 230, 0, 0.35);
+        }
+
+        .grupo-zoom {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(2, 12, 24, 0.88);
+            border: 1px solid rgba(0, 240, 255, 0.45);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .grupo-zoom button {
+            background: transparent;
+            border: none;
+            color: #e2f8ff;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 6px 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .grupo-zoom button:hover {
+            background: rgba(0, 240, 255, 0.25);
+            color: #00f0ff;
+        }
+
+        #btn-salir:hover {
+            background: #ff0055;
+            border-color: #ff0055;
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(255, 0, 85, 0.65);
+        }
+
+        /* Pedales inferiores */
+        .controles-maglev {
+            display: none;
+            position: fixed;
+            bottom: max(16px, env(safe-area-inset-bottom, 16px));
+            left: 50%;
+            transform: translateX(-50%);
+            gap: 14px;
+            z-index: 35;
+            align-items: center;
+            width: max-content;
+            max-width: 96vw;
+            transition: left 0.2s ease, right 0.2s ease, transform 0.2s ease;
+        }
+
+        .controles-maglev.en-cabina {
+            left: auto;
+            right: 16px;
+            transform: none;
+        }
+
+        .btn-pedal {
+            width: 132px;
+            height: 72px;
+            border-radius: 16px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            transition: transform 0.08s ease, box-shadow 0.1s ease, background 0.1s ease;
+        }
+
+        .btn-claxon {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            border: 2px solid #00f0ff;
+            background: rgba(2, 18, 34, 0.9);
+            color: #00f0ff;
+            font-size: 1.15rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 16px rgba(0, 240, 255, 0.35);
+            transition: transform 0.08s ease, background 0.1s ease;
+        }
+
+        .btn-claxon:active {
+            transform: scale(0.9);
+            background: #00f0ff;
+            color: #000;
+        }
+
+        #btn-freno {
+            border: 2px solid #ff0055;
+            background: linear-gradient(180deg, rgba(255, 0, 85, 0.28), rgba(40, 10, 20, 0.92));
+            color: #ff0055;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.35);
+        }
+
+        #btn-freno:active, #btn-freno.activo {
+            transform: scale(0.94);
+            background: #ff0055;
+            color: #ffffff;
+            box-shadow: 0 0 40px rgba(255, 0, 85, 0.95);
+        }
+
+        #btn-acelerar {
+            border: 2px solid #39ff14;
+            background: linear-gradient(180deg, rgba(57, 255, 20, 0.28), rgba(10, 40, 15, 0.92));
+            color: #39ff14;
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.35);
+        }
+
+        #btn-acelerar:active, #btn-acelerar.activo {
+            transform: scale(0.94);
+            background: #39ff14;
+            color: #000000;
+            box-shadow: 0 0 40px rgba(57, 255, 20, 0.95);
+        }
+
+        /* Ajustes específicos para pantallas móviles */
+        @media (max-width: 820px) {
+            .controles-sup {
+                max-width: calc(100vw - 12px);
+                left: 6px;
+                right: 6px;
+                top: 6px;
+                justify-content: center;
+                gap: 4px;
+            }
+
+            .btn-sup {
+                padding: 5px 7px;
+                font-size: 0.65rem;
+            }
+
+            .grupo-zoom button {
+                padding: 5px 6px;
+                font-size: 0.65rem;
+            }
+
+            .controles-maglev {
+                gap: 8px;
+                bottom: max(12px, env(safe-area-inset-bottom, 12px));
+            }
+
+            .controles-maglev.en-cabina {
+                right: 8px;
+                gap: 6px;
+            }
+
+            .btn-pedal {
+                width: 112px;
+                height: 62px;
+                font-size: 0.82rem;
+            }
+
+            .controles-maglev.en-cabina .btn-pedal {
+                width: 82px;
+                height: 56px;
+                font-size: 0.72rem;
+            }
+
+            .btn-pedal small {
+                display: none;
+            }
+
+            .btn-claxon {
+                width: 48px;
+                height: 48px;
+                font-size: 1rem;
+            }
+
+            .controles-maglev.en-cabina .btn-claxon {
+                width: 40px;
+                height: 40px;
+                font-size: 0.9rem;
+            }
+        }
+
+        #canvas-container {
+            display: none;
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        canvas {
+            display: block;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body>
+
+    <button id="btn-inicio">INICIO</button>
+
+    <div class="controles-sup" id="panel-sup">
+        <button class="btn-sup" id="btn-vista">🎥 Vista: EXTERIOR</button>
+        <div class="grupo-zoom" id="grupo-zoom">
+            <button id="btn-zoom-out" title="Alejar cámara [-]">🔍−</button>
+            <button id="btn-zoom-reset" title="Zoom automático">AUTO</button>
+            <button id="btn-zoom-in" title="Acercar cámara [+]">🔍+</button>
+        </div>
+        <button class="btn-sup" id="btn-ruta">🗺️ L1 CENTRO</button>
+        <button class="btn-sup" id="btn-piloto">🤖 Piloto: OFF</button>
+        <button class="btn-sup" id="btn-servicio">🚄 LOCAL</button>
+        <button class="btn-sup" id="btn-clima">🌦️ AUTO</button>
+        <button class="btn-sup" id="btn-audio">🔊 ON</button>
+        <button class="btn-sup" id="btn-reiniciar">↻ Línea</button>
+        <button class="btn-sup" id="btn-salir">✖</button>
+    </div>
+
+    <div class="controles-maglev" id="controles-maglev">
+        <button class="btn-pedal" id="btn-freno">
+            <span>🛑 FRENAR</span>
+            <small>[ESPACIO / ↓]</small>
+        </button>
+        <button class="btn-claxon" id="btn-claxon" title="Claxon Maglev [H]">📯</button>
+        <button class="btn-pedal" id="btn-acelerar">
+            <span>⚡ ACELERAR</span>
+            <small>[W / →]</small>
+        </button>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="maglevCanvas"></canvas>
+    </div>
+
+    <script>
+        // =====================================================================
+        // REFERENCIAS DOM Y ESTADO GLOBAL
+        // =====================================================================
+        const btnInicio = document.getElementById('btn-inicio');
+        const panelSup = document.getElementById('panel-sup');
+        const controlesMaglev = document.getElementById('controles-maglev');
+        const btnAcelerar = document.getElementById('btn-acelerar');
+        const btnFreno = document.getElementById('btn-freno');
+        const btnClaxon = document.getElementById('btn-claxon');
+        const btnVista = document.getElementById('btn-vista');
+        const grupoZoom = document.getElementById('grupo-zoom');
+        const btnZoomOut = document.getElementById('btn-zoom-out');
+        const btnZoomReset = document.getElementById('btn-zoom-reset');
+        const btnZoomIn = document.getElementById('btn-zoom-in');
+        const btnRuta = document.getElementById('btn-ruta');
+        const btnPiloto = document.getElementById('btn-piloto');
+        const btnServicio = document.getElementById('btn-servicio');
+        const btnClima = document.getElementById('btn-clima');
+        const btnAudio = document.getElementById('btn-audio');
+        const btnReiniciar = document.getElementById('btn-reiniciar');
+        const btnSalir = document.getElementById('btn-salir');
+        const canvasContainer = document.getElementById('canvas-container');
+        const canvas = document.getElementById('maglevCanvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+
+        let animacionId = null;
+        let activo = false;
+        let ultimoFrame = 0;
+
+        let pilotoAutomatico = false;
+        let modoExpreso = false;
+        let audioActivo = true;
+        let vistaCabina = false;
+        let zoomManual = null;
+
+        // Rutas seleccionables con identidad y estaciones propias
+        const RUTAS = [
+            {
+                id: 0,
+                etiqueta: 'L1 CENTRO',
+                factorVel: 1.0,
+                color: '#00f0ff',
+                estaciones: ['MADRID', 'GUADALAJARA', 'ZARAGOZA', 'LLEIDA', 'TARRAGONA', 'BARCELONA SANTS']
+            },
+            {
+                id: 1,
+                etiqueta: 'L2 COSTERA',
+                factorVel: 1.08,
+                color: '#39ff14',
+                estaciones: ['BARCELONA', 'TARRAGONA', 'PEÑÍSCOLA', 'CASTELLÓN', 'VALENCIA', 'ALICANTE']
+            },
+            {
+                id: 2,
+                etiqueta: 'L3 ORBITAL',
+                factorVel: 1.16,
+                color: '#ff007f',
+                estaciones: ['LEÓN', 'SALAMANCA', 'ÁVILA', 'TOLEDO', 'SEVILLA', 'MÁLAGA']
+            }
+        ];
+        let indiceRuta = 0;
+
+        // Paletas de cielo para transiciones suaves entre climas/ciclos solares
+        const PALETAS_CIELO = {
+            AMANECER:  { top: [11, 16, 38],   mid: [45, 27, 78],   low: [157, 56, 102], hor: [255, 158, 68],  solAlpha: 1,   nieblaAlpha: 0 },
+            SOLEADO:   { top: [12, 74, 140],  mid: [29, 117, 194], low: [92, 179, 235],  hor: [188, 227, 250], solAlpha: 1,   nieblaAlpha: 0 },
+            ATARDECER: { top: [18, 8, 38],    mid: [74, 18, 72],   low: [194, 54, 72],   hor: [255, 107, 43],  solAlpha: 1,   nieblaAlpha: 0 },
+            DESPEJADO: { top: [1, 3, 10],     mid: [4, 13, 31],    low: [11, 25, 54],    hor: [24, 13, 44],    solAlpha: 0,   nieblaAlpha: 0 },
+            LLUVIA:    { top: [2, 6, 16],     mid: [7, 18, 36],    low: [14, 30, 56],    hor: [22, 24, 48],    solAlpha: 0,   nieblaAlpha: 0.12 },
+            TORMENTA:  { top: [1, 3, 9],      mid: [5, 11, 24],    low: [12, 18, 38],    hor: [24, 14, 38],    solAlpha: 0,   nieblaAlpha: 0.18 },
+            NIEBLA:    { top: [5, 14, 28],    mid: [12, 30, 54],   low: [24, 52, 82],    hor: [42, 74, 104],   solAlpha: 0.2, nieblaAlpha: 0.65 }
+        };
+
+        // Sistema de clima y transición gradual
+        const CLIMAS = ['AMANECER', 'SOLEADO', 'ATARDECER', 'DESPEJADO', 'LLUVIA', 'TORMENTA', 'NIEBLA'];
+        let climaAuto = true;
+        let indiceClima = 0;
+        let climaActual = CLIMAS[indiceClima];
+        let temporizadorClima = 0;
+        let intensidadRelampago = 0;
+        let rayoActual = null;
+        let mezclaTunel = 0; // 0 = exterior, 1 = dentro de túnel
+
+        let cieloSuavizado = {
+            top: [...PALETAS_CIELO.AMANECER.top],
+            mid: [...PALETAS_CIELO.AMANECER.mid],
+            low: [...PALETAS_CIELO.AMANECER.low],
+            hor: [...PALETAS_CIELO.AMANECER.hor],
+            solAlpha: PALETAS_CIELO.AMANECER.solAlpha,
+            nieblaAlpha: PALETAS_CIELO.AMANECER.nieblaAlpha
+        };
+
+        // Sistema de puntuación, control térmico y rangos de conductor
+        let puntuacion = 0;
+        let rachaParadas = 0;
+        let rangoActual = 'CADETE';
+        let bloqueoTermico = false;
+        let ultimaValoracion = null;
+        let mensajeMegafonia = 'BIENVENIDO A NEON MAGLEV EXPRESS';
+
+        let estadoRuta = 'EN_MARCHA';
+        let mensajeRuta = '';
+        let tiempoFinRuta = 0;
+        let numeroLinea = 1;
+        let estacionesVisitadas = 0;
+        let totalParadasRuta = 6;
+        let direccionSentido = 1;
+
+        let estacionActualAvisada = null;
+        let tiempoAvisoInicio = 0;
+        let mostrarAvisoEstacion = false;
+
+        const LONGITUD_VIA = 36000;
+        const LONGITUD_TREN = 520;
+        const LIMITE_SEGURIDAD_IZQ = 2200;
+        const LIMITE_SEGURIDAD_DER = 33000;
+
+        let tren = {
+            x: 3200,
+            velocidad: 0,
+            acelerando: false,
+            frenando: false,
+            temperaturaMagnetica: 30,
+            pasajeros: 140,
+            inclinacion: 0
+        };
+
+        let estaciones = [];
+        let tuneles = [];
+        let edificiosFondo = [];
+        let estrellasFondo = [];
+        let particulasPlasma = [];
+        let chispasFreno = [];
+        let postesVia = [];
+        let lineasVelocidad = [];
+        let gotasLluvia = [];
+        let trenesParalelos = [];
+        let traficoAereo = [];
+
+        // =====================================================================
+        // MOTOR DE AUDIO SINTÉTICO SUAVE (WEB AUDIO API)
+        // =====================================================================
+        let audioCtx = null;
+        let motorOsc = null;
+        let motorSubOsc = null;
+        let motorFiltro = null;
+        let motorGain = null;
+
+        function inicializarAudio() {
+            try {
+                if (!audioCtx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    audioCtx = new AudioContextClass();
+
+                    motorOsc = audioCtx.createOscillator();
+                    motorSubOsc = audioCtx.createOscillator();
+                    motorFiltro = audioCtx.createBiquadFilter();
+                    motorGain = audioCtx.createGain();
+
+                    motorOsc.type = 'sine';
+                    motorSubOsc.type = 'sine';
+                    motorOsc.frequency.value = 45;
+                    motorSubOsc.frequency.value = 90;
+
+                    motorFiltro.type = 'lowpass';
+                    motorFiltro.frequency.value = 240;
+                    motorFiltro.Q.value = 0.7;
+
+                    motorGain.gain.value = 0;
+
+                    motorOsc.connect(motorFiltro);
+                    motorSubOsc.connect(motorFiltro);
+                    motorFiltro.connect(motorGain);
+                    motorGain.connect(audioCtx.destination);
+
+                    motorOsc.start();
+                    motorSubOsc.start();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            } catch (_) {}
+        }
+
+        function actualizarSonidoMotor(velocidad, frenando) {
+            if (!audioCtx || !motorGain || !motorFiltro) return;
+            if (!audioActivo || !activo || velocidad < 2) {
+                motorGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.12);
+                return;
+            }
+            const velMaxRef = modoExpreso ? 920 : 750;
+            const ratio = Math.min(1, velocidad / velMaxRef);
+            const freqBase = 42 + ratio * (modoExpreso ? 88 : 72);
+            const freqArmonico = frenando ? freqBase * 1.25 : freqBase * 1.5;
+            const corteFiltro = 160 + ratio * 240;
+            const volumen = Math.min(0.048, 0.012 + ratio * 0.032);
+
+            motorOsc.frequency.setTargetAtTime(freqBase, audioCtx.currentTime, 0.1);
+            motorSubOsc.frequency.setTargetAtTime(freqArmonico, audioCtx.currentTime, 0.1);
+            motorFiltro.frequency.setTargetAtTime(corteFiltro, audioCtx.currentTime, 0.12);
+            motorGain.gain.setTargetAtTime(volumen, audioCtx.currentTime, 0.12);
+        }
+
+        function tocarClaxonMaglev() {
+            inicializarAudio();
+            if (!audioActivo || !audioCtx) return;
+            const ahora = audioCtx.currentTime;
+            const freqs = [277.18, 349.23];
+            freqs.forEach((f) => {
+                const osc = audioCtx.createOscillator();
+                const filtro = audioCtx.createBiquadFilter();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(f, ahora);
+                filtro.type = 'lowpass';
+                filtro.frequency.setValueAtTime(950, ahora);
+
+                gain.gain.setValueAtTime(0.001, ahora);
+                gain.gain.linearRampToValueAtTime(0.045, ahora + 0.04);
+                gain.gain.exponentialRampToValueAtTime(0.0008, ahora + 0.45);
+
+                osc.connect(filtro);
+                filtro.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(ahora);
+                osc.stop(ahora + 0.48);
+            });
+        }
+
+        function tocarTonoParadaPerfecta() {
+            if (!audioActivo || !audioCtx) return;
+            const ahora = audioCtx.currentTime;
+            const notas = [523.25, 659.25, 783.99];
+            notas.forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                const filtro = audioCtx.createBiquadFilter();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ahora + idx * 0.09);
+                filtro.type = 'lowpass';
+                filtro.frequency.setValueAtTime(1100, ahora + idx * 0.09);
+
+                const tInicio = ahora + idx * 0.09;
+                gain.gain.setValueAtTime(0.0001, tInicio);
+                gain.gain.linearRampToValueAtTime(0.032, tInicio + 0.03);
+                gain.gain.exponentialRampToValueAtTime(0.0008, tInicio + 0.32);
+
+                osc.connect(filtro);
+                filtro.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(tInicio);
+                osc.stop(tInicio + 0.34);
+            });
+        }
+
+        function tocarTonoAvisoEstacion() {
+            if (!audioActivo || !audioCtx) return;
+            const ahora = audioCtx.currentTime;
+            const notas = [392.0, 493.88];
+            notas.forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                const filtro = audioCtx.createBiquadFilter();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ahora + idx * 0.16);
+                filtro.type = 'lowpass';
+                filtro.frequency.setValueAtTime(900, ahora + idx * 0.16);
+
+                const tInicio = ahora + idx * 0.16;
+                gain.gain.setValueAtTime(0.0001, tInicio);
+                gain.gain.linearRampToValueAtTime(0.035, tInicio + 0.04);
+                gain.gain.exponentialRampToValueAtTime(0.0008, tInicio + 0.34);
+
+                osc.connect(filtro);
+                filtro.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(tInicio);
+                osc.stop(tInicio + 0.36);
+            });
+        }
+
+        function tocarDingDongPuertas() {
+            if (!audioActivo || !audioCtx) return;
+            const ahora = audioCtx.currentTime;
+            const notas = [329.63, 261.63];
+            notas.forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                const filtro = audioCtx.createBiquadFilter();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ahora + idx * 0.28);
+                filtro.type = 'lowpass';
+                filtro.frequency.setValueAtTime(750, ahora + idx * 0.28);
+
+                const tInicio = ahora + idx * 0.28;
+                gain.gain.setValueAtTime(0.0001, tInicio);
+                gain.gain.linearRampToValueAtTime(0.045, tInicio + 0.04);
+                gain.gain.exponentialRampToValueAtTime(0.0008, tInicio + 0.65);
+
+                osc.connect(filtro);
+                filtro.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(tInicio);
+                osc.stop(tInicio + 0.68);
+            });
+        }
+
+        // =====================================================================
+        // TRANSICIONES SUAVES, RANGO Y UTILIDADES
+        // =====================================================================
+        function interpolarValor(actual, objetivo, factor) {
+            return actual + (objetivo - actual) * factor;
+        }
+
+        function interpolarRgb(arrActual, arrObjetivo, factor) {
+            return [
+                interpolarValor(arrActual[0], arrObjetivo[0], factor),
+                interpolarValor(arrActual[1], arrObjetivo[1], factor),
+                interpolarValor(arrActual[2], arrObjetivo[2], factor)
+            ];
+        }
+
+        function rgbCss(arr, alpha = 1) {
+            const r = Math.round(arr[0]);
+            const g = Math.round(arr[1]);
+            const b = Math.round(arr[2]);
+            return alpha < 1 ? `rgba(${r}, ${g}, ${b}, ${alpha})` : `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function actualizarTransicionesAmbiente(dt, tunelActivo) {
+            const factorCielo = Math.min(1, dt * 1.15);
+            const paletaObj = PALETAS_CIELO[climaActual] || PALETAS_CIELO.DESPEJADO;
+
+            cieloSuavizado.top = interpolarRgb(cieloSuavizado.top, paletaObj.top, factorCielo);
+            cieloSuavizado.mid = interpolarRgb(cieloSuavizado.mid, paletaObj.mid, factorCielo);
+            cieloSuavizado.low = interpolarRgb(cieloSuavizado.low, paletaObj.low, factorCielo);
+            cieloSuavizado.hor = interpolarRgb(cieloSuavizado.hor, paletaObj.hor, factorCielo);
+            cieloSuavizado.solAlpha = interpolarValor(cieloSuavizado.solAlpha, paletaObj.solAlpha, factorCielo);
+            cieloSuavizado.nieblaAlpha = interpolarValor(cieloSuavizado.nieblaAlpha, paletaObj.nieblaAlpha, factorCielo);
+
+            const objetivoTunel = tunelActivo ? 1 : 0;
+            mezclaTunel = interpolarValor(mezclaTunel, objetivoTunel, Math.min(1, dt * 5.5));
+        }
+
+        function calcularRangoConductor(pts) {
+            if (pts >= 1500) return 'PILOTO SUPREMO';
+            if (pts >= 800) return 'MAESTRO MAGLEV';
+            if (pts >= 350) return 'CONDUCTOR PRO';
+            return 'CADETE';
+        }
+
+        function estaEnTunel(xPos) {
+            for (let t of tuneles) {
+                if (xPos >= t.inicio && xPos <= t.fin) return t;
+            }
+            return null;
+        }
+
+        // =====================================================================
+        // CONTROLES, ZOOM, CAMBIO DE CÁMARA Y TECLADO
+        // =====================================================================
+        function ajustarCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', () => {
+            if (activo) ajustarCanvas();
+        });
+
+        function obtenerEscalaBaseAuto(w) {
+            return w < 520 ? 0.56 : (w < 820 ? 0.75 : 1.0);
+        }
+
+        function actualizarTextoZoom() {
+            if (zoomManual === null) {
+                btnZoomReset.textContent = 'AUTO';
+                btnZoomReset.style.color = '#e2f8ff';
+            } else {
+                btnZoomReset.textContent = `${Math.round(zoomManual * 100)}%`;
+                btnZoomReset.style.color = '#39ff14';
+            }
+        }
+
+        function modificarZoom(delta) {
+            if (vistaCabina) return;
+            const actual = zoomManual !== null ? zoomManual : obtenerEscalaBaseAuto(canvas.width);
+            zoomManual = Math.max(0.42, Math.min(1.45, Math.round((actual + delta) * 100) / 100));
+            actualizarTextoZoom();
+        }
+
+        btnZoomIn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            modificarZoom(0.12);
+        });
+
+        btnZoomOut.addEventListener('click', (e) => {
+            e.stopPropagation();
+            modificarZoom(-0.12);
+        });
+
+        btnZoomReset.addEventListener('click', (e) => {
+            e.stopPropagation();
+            zoomManual = null;
+            actualizarTextoZoom();
+        });
+
+        window.addEventListener('wheel', (e) => {
+            if (!activo || vistaCabina) return;
+            modificarZoom(e.deltaY < 0 ? 0.08 : -0.08);
+        }, { passive: true });
+
+        function alternarVistaCabina() {
+            vistaCabina = !vistaCabina;
+            btnVista.textContent = vistaCabina ? '🎥 Vista: CABINA' : '🎥 Vista: EXTERIOR';
+            btnVista.classList.toggle('modo-cabina', vistaCabina);
+            controlesMaglev.classList.toggle('en-cabina', vistaCabina);
+            grupoZoom.style.opacity = vistaCabina ? '0.4' : '1';
+            grupoZoom.style.pointerEvents = vistaCabina ? 'none' : 'auto';
+        }
+
+        btnVista.addEventListener('click', (e) => {
+            e.stopPropagation();
+            alternarVistaCabina();
+        });
+
+        function actualizarBotonRuta() {
+            const ruta = RUTAS[indiceRuta];
+            btnRuta.textContent = `🗺️ ${ruta.etiqueta}`;
+        }
+
+        btnRuta.addEventListener('click', (e) => {
+            e.stopPropagation();
+            indiceRuta = (indiceRuta + 1) % RUTAS.length;
+            actualizarBotonRuta();
+            generarRedMaglev();
+        });
+
+        function desactivarPilotoSiManual() {
+            if (pilotoAutomatico) {
+                pilotoAutomatico = false;
+                actualizarBotonPiloto();
+            }
+        }
+
+        function actualizarBotonPiloto() {
+            btnPiloto.textContent = pilotoAutomatico ? '🤖 Piloto: ON' : '🤖 Piloto: OFF';
+            btnPiloto.classList.toggle('activo-modo', pilotoAutomatico);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (!activo) return;
+            if (e.key === ' ' || e.code === 'Space' || e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+                e.preventDefault();
+                desactivarPilotoSiManual();
+                tren.frenando = true;
+                btnFreno.classList.add('activo');
+            }
+            if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                desactivarPilotoSiManual();
+                tren.acelerando = true;
+                btnAcelerar.classList.add('activo');
+            }
+            if (e.key === 'h' || e.key === 'H') {
+                e.preventDefault();
+                tocarClaxonMaglev();
+            }
+            if (e.key === 'c' || e.key === 'C') {
+                e.preventDefault();
+                alternarVistaCabina();
+            }
+            if (e.key === '+' || e.key === '=') {
+                e.preventDefault();
+                modificarZoom(0.12);
+            }
+            if (e.key === '-') {
+                e.preventDefault();
+                modificarZoom(-0.12);
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (!activo) return;
+            if (e.key === ' ' || e.code === 'Space' || e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+                tren.frenando = false;
+                btnFreno.classList.remove('activo');
+            }
+            if (e.key === 'w' || e.key === 'W' || e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                tren.acelerando = false;
+                btnAcelerar.classList.remove('activo');
+            }
+        });
+
+        const bindHold = (btn, onPress, onRelease) => {
+            const start = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                desactivarPilotoSiManual();
+                onPress();
+                btn.classList.add('activo');
+            };
+            const end = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onRelease();
+                btn.classList.remove('activo');
+            };
+            btn.addEventListener('mousedown', start);
+            btn.addEventListener('mouseup', end);
+            btn.addEventListener('mouseleave', end);
+            btn.addEventListener('touchstart', start, { passive: false });
+            btn.addEventListener('touchend', end);
+            btn.addEventListener('touchcancel', end);
+        };
+
+        bindHold(btnAcelerar, () => { tren.acelerando = true; }, () => { tren.acelerando = false; });
+        bindHold(btnFreno, () => { tren.frenando = true; }, () => { tren.frenando = false; });
+
+        btnClaxon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            tocarClaxonMaglev();
+        });
+
+        btnPiloto.addEventListener('click', (e) => {
+            e.stopPropagation();
+            pilotoAutomatico = !pilotoAutomatico;
+            if (!pilotoAutomatico) {
+                tren.acelerando = false;
+                tren.frenando = false;
+                btnAcelerar.classList.remove('activo');
+                btnFreno.classList.remove('activo');
+            }
+            actualizarBotonPiloto();
+        });
+
+        btnServicio.addEventListener('click', (e) => {
+            e.stopPropagation();
+            modoExpreso = !modoExpreso;
+            btnServicio.textContent = modoExpreso ? '⚡ EXPRESO' : '🚄 LOCAL';
+            btnServicio.classList.toggle('modo-expreso', modoExpreso);
+            generarRedMaglev();
+        });
+
+        btnClima.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (climaAuto) {
+                climaAuto = false;
+                indiceClima = 0;
+                climaActual = CLIMAS[indiceClima];
+                btnClima.textContent = `🌦️ ${climaActual}`;
+            } else {
+                indiceClima++;
+                if (indiceClima >= CLIMAS.length) {
+                    climaAuto = true;
+                    indiceClima = 0;
+                    climaActual = CLIMAS[indiceClima];
+                    btnClima.textContent = '🌦️ AUTO';
+                } else {
+                    climaActual = CLIMAS[indiceClima];
+                    btnClima.textContent = `🌦️ ${climaActual}`;
+                }
+            }
+            temporizadorClima = 0;
+        });
+
+        btnAudio.addEventListener('click', (e) => {
+            e.stopPropagation();
+            inicializarAudio();
+            audioActivo = !audioActivo;
+            btnAudio.textContent = audioActivo ? '🔊 ON' : '🔇 OFF';
+        });
+
+        btnReiniciar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            numeroLinea++;
+            generarRedMaglev();
+        });
+
+        btnInicio.addEventListener('click', () => {
+            inicializarAudio();
+            btnInicio.style.display = 'none';
+            panelSup.style.display = 'flex';
+            controlesMaglev.style.display = 'flex';
+            canvasContainer.style.display = 'block';
+
+            ajustarCanvas();
+            numeroLinea = 1;
+            puntuacion = 0;
+            rachaParadas = 0;
+            rangoActual = 'CADETE';
+            indiceRuta = 0;
+            mezclaTunel = 0;
+            actualizarBotonRuta();
+            generarPaisajeCyberpunk();
+            generarRedMaglev();
+
+            activo = true;
+            ultimoFrame = performance.now();
+            iniciarBucle(ultimoFrame);
+        });
+
+        btnSalir.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activo = false;
+            if (motorGain && audioCtx) {
+                motorGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
+            }
+            if (animacionId) cancelAnimationFrame(animacionId);
+
+            canvasContainer.style.display = 'none';
+            panelSup.style.display = 'none';
+            controlesMaglev.style.display = 'none';
+            btnInicio.style.display = 'block';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+
+        // =====================================================================
+        // GENERACIÓN DE ESCENARIO, TÚNELES, CIUDAD VIVA Y RED MAGLEV
+        // =====================================================================
+        function generarPaisajeCyberpunk() {
+            estrellasFondo = [];
+            for (let i = 0; i < 95; i++) {
+                estrellasFondo.push({
+                    x: Math.random() * 2500,
+                    y: Math.random() * 450,
+                    tam: 1 + Math.random() * 1.8,
+                    fase: Math.random() * Math.PI * 2,
+                    color: Math.random() > 0.3 ? '#e0f2fe' : '#00f0ff'
+                });
+            }
+
+            edificiosFondo = [];
+            const paletaVentanas = ['#00f0ff', '#ff007f', '#ffe600', '#a855f7'];
+            const paletaCarteles = ['#00f0ff', '#ff0055', '#39ff14', '#ffe600'];
+            const textosCartel = ['MAG-NET', 'CYBER-09', 'VOLT-X', 'NEO-HUB', 'PULSE', 'HYPER-7'];
+
+            for (let i = -50; i < 290; i++) {
+                const tieneCartel = Math.random() > 0.65;
+                edificiosFondo.push({
+                    x: i * 160 + Math.random() * 35,
+                    ancho: 105 + Math.random() * 80,
+                    alto: 220 + Math.random() * 380,
+                    colorVentana: paletaVentanas[Math.floor(Math.random() * paletaVentanas.length)],
+                    antena: Math.random() > 0.55,
+                    colorBaliza: Math.random() > 0.5 ? '#ff0055' : '#00f0ff',
+                    tieneCartel,
+                    textoCartel: textosCartel[Math.floor(Math.random() * textosCartel.length)],
+                    colorCartel: paletaCarteles[Math.floor(Math.random() * paletaCarteles.length)]
+                });
+            }
+
+            tuneles = [
+                { id: 1, nombre: 'TÚNEL ALPHA', inicio: 6200, fin: 8200, color: '#00f0ff' },
+                { id: 2, nombre: 'TÚNEL PRISMA', inicio: 16600, fin: 19000, color: '#ff007f' },
+                { id: 3, nombre: 'TÚNEL VORTEX', inicio: 27000, fin: 29400, color: '#ffe600' }
+            ];
+
+            postesVia = [];
+            for (let i = -140; i < 780; i++) {
+                postesVia.push(i * 60);
+            }
+
+            lineasVelocidad = [];
+            for (let i = 0; i < 65; i++) {
+                lineasVelocidad.push({
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    longitud: 70 + Math.random() * 150,
+                    velocidadFactor: 1.5 + Math.random() * 3.5
+                });
+            }
+
+            gotasLluvia = [];
+            for (let i = 0; i < 180; i++) {
+                gotasLluvia.push({
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    velY: 540 + Math.random() * 320,
+                    largo: 12 + Math.random() * 16,
+                    color: Math.random() > 0.25 ? 'rgba(0, 240, 255, 0.3)' : 'rgba(255, 0, 127, 0.28)'
+                });
+            }
+
+            trenesParalelos = [
+                { x: 4000, dir: -1, vel: 580, color: '#00f0ff' },
+                { x: 16000, dir: -1, vel: 640, color: '#ff007f' },
+                { x: 28000, dir: 1, vel: 540, color: '#39ff14' }
+            ];
+
+            traficoAereo = [];
+            const coloresAereos = ['#00f0ff', '#ff007f', '#ffe600', '#39ff14'];
+            for (let i = 0; i < 10; i++) {
+                traficoAereo.push({
+                    x: 1500 + i * 3100,
+                    altOffset: 170 + (i % 4) * 65,
+                    dir: i % 2 === 0 ? 1 : -1,
+                    vel: 220 + (i % 3) * 90,
+                    color: coloresAereos[i % coloresAereos.length],
+                    fase: i * 1.1
+                });
+            }
+        }
+
+        function generarRedMaglev() {
+            const ruta = RUTAS[indiceRuta];
+            estadoRuta = 'EN_MARCHA';
+            mensajeRuta = '';
+            tiempoFinRuta = 0;
+            particulasPlasma = [];
+            chispasFreno = [];
+            estacionActualAvisada = null;
+            mostrarAvisoEstacion = false;
+            direccionSentido = 1;
+            estacionesVisitadas = 0;
+            bloqueoTermico = false;
+            ultimaValoracion = null;
+
+            tren = {
+                x: 3200,
+                velocidad: 0,
+                acelerando: false,
+                frenando: false,
+                temperaturaMagnetica: 30,
+                pasajeros: 140,
+                inclinacion: 0
+            };
+
+            estaciones = [];
+            const paradasExpreso = [0, 2, 5];
+            totalParadasRuta = modoExpreso ? paradasExpreso.length : 6;
+
+            for (let i = 0; i < 6; i++) {
+                const esParadaActiva = !modoExpreso || paradasExpreso.includes(i);
+                const nombreEst = ruta.estaciones[i] || `SECTOR #${i + 1}`;
+                estaciones.push({
+                    id: i,
+                    x: 4500 + i * 5200,
+                    ancho: LONGITUD_TREN,
+                    nombre: `${nombreEst} (${ruta.etiqueta})`,
+                    esParadaActiva,
+                    detenido: false,
+                    avisoMostrado: false,
+                    superada: false
+                });
+            }
+
+            mensajeMegafonia = `${ruta.etiqueta} (${modoExpreso ? 'EXPRESO' : 'LOCAL'}) — RANGO: ${rangoActual}`;
+        }
+
+        // =====================================================================
+        // INVERSIÓN DE SENTIDO EN BUCLE (IDA Y VUELTA CONTINUO)
+        // =====================================================================
+        function invertirSentidoBucle(estacionTerminal, fueReboteSeguridad = false) {
+            const ruta = RUTAS[indiceRuta];
+            direccionSentido *= -1;
+            estacionesVisitadas = 1;
+            numeroLinea++;
+
+            for (let s of estaciones) {
+                s.detenido = false;
+                s.avisoMostrado = false;
+                s.superada = false;
+            }
+
+            if (estacionTerminal) {
+                estacionTerminal.detenido = true;
+            }
+
+            const destinoNombre = direccionSentido === 1
+                ? ruta.estaciones[ruta.estaciones.length - 1]
+                : ruta.estaciones[0];
+            const rumboTexto = direccionSentido === 1 ? 'SENTIDO IDA ▶' : 'SENTIDO VUELTA ◀';
+
+            if (fueReboteSeguridad) {
+                mensajeRuta = `⚠️ TOPE DE VÍA — INVIRTIENDO (${rumboTexto})`;
+                mensajeMegafonia = `FRENO DE SEGURIDAD — NUEVO RUMBO: ${destinoNombre}`;
+            } else {
+                mensajeRuta = `🔄 TERMINAL ALCANZADA — ${rumboTexto}`;
+                mensajeMegafonia = `INVERSIÓN DE MARCHA — DESTINO: ${destinoNombre}`;
+            }
+        }
+
+        // =====================================================================
+        // SISTEMAS DE PARTÍCULAS
+        // =====================================================================
+        function emitirPlasmaMaglev(x, y, dir) {
+            const cantidad = modoExpreso ? 4 : 3;
+            for (let i = 0; i < cantidad; i++) {
+                particulasPlasma.push({
+                    x: x - dir * (220 + Math.random() * 40),
+                    y: y + 14 + (Math.random() - 0.5) * 6,
+                    vx: -dir * (450 + Math.random() * 320),
+                    vy: (Math.random() - 0.5) * 40,
+                    vida: 0.35,
+                    tam: (modoExpreso ? 2.6 : 2.2) + Math.random() * 2.8,
+                    color: modoExpreso ? (Math.random() > 0.4 ? '#ff007f' : '#ffe600') : '#00f0ff'
+                });
+            }
+        }
+
+        function emitirChispasFreno(x, y, dir) {
+            for (let i = 0; i < 3; i++) {
+                chispasFreno.push({
+                    x: x + dir * (140 + Math.random() * 70),
+                    y: y + 16 + (Math.random() - 0.5) * 4,
+                    vx: -dir * (180 + Math.random() * 240),
+                    vy: -60 - Math.random() * 140,
+                    vida: 0.28,
+                    tam: 2 + Math.random() * 2.2,
+                    color: Math.random() > 0.35 ? '#ff0055' : '#ffe600'
+                });
+            }
+        }
+
+        // =====================================================================
+        // CIELO Y CICLO SOLAR CON TRANSICIÓN SUAVE
+        // =====================================================================
+        function dibujarCieloYClimaBase(ctx, w, h, alturaVia, timestamp) {
+            const gradCielo = ctx.createLinearGradient(0, 0, 0, alturaVia);
+            gradCielo.addColorStop(0, rgbCss(cieloSuavizado.top));
+            gradCielo.addColorStop(0.45, rgbCss(cieloSuavizado.mid));
+            gradCielo.addColorStop(0.82, rgbCss(cieloSuavizado.low));
+            gradCielo.addColorStop(1, rgbCss(cieloSuavizado.hor));
+
+            ctx.fillStyle = gradCielo;
+            ctx.fillRect(0, 0, w, h);
+
+            if (cieloSuavizado.solAlpha > 0.02) {
+                let sunX = w * 0.72;
+                let sunY = alturaVia * 0.78;
+                let sunRadio = Math.min(w, h) * 0.085;
+                let colorNucleo = '#fff7cc';
+                let colorHalo = 'rgba(255, 190, 90, 0.45)';
+
+                if (climaActual === 'AMANECER') {
+                    sunX = w * 0.76;
+                    sunY = alturaVia * 0.82;
+                    sunRadio = Math.min(w, h) * 0.095;
+                    colorNucleo = '#ffe8a3';
+                    colorHalo = 'rgba(255, 145, 77, 0.5)';
+                } else if (climaActual === 'SOLEADO') {
+                    sunX = w * 0.68;
+                    sunY = alturaVia * 0.28;
+                    sunRadio = Math.min(w, h) * 0.075;
+                    colorNucleo = '#ffffff';
+                    colorHalo = 'rgba(255, 240, 150, 0.55)';
+                } else if (climaActual === 'ATARDECER') {
+                    sunX = w * 0.28;
+                    sunY = alturaVia * 0.84;
+                    sunRadio = Math.min(w, h) * 0.11;
+                    colorNucleo = '#ffbe55';
+                    colorHalo = 'rgba(255, 75, 43, 0.55)';
+                }
+
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, Math.min(1, cieloSuavizado.solAlpha * (1 - mezclaTunel * 0.9)));
+                const gradSol = ctx.createRadialGradient(sunX, sunY, sunRadio * 0.2, sunX, sunY, sunRadio * 3.4);
+                gradSol.addColorStop(0, colorNucleo);
+                gradSol.addColorStop(0.32, colorHalo);
+                gradSol.addColorStop(1, 'rgba(255, 120, 40, 0)');
+                ctx.fillStyle = gradSol;
+                ctx.beginPath();
+                ctx.arc(sunX, sunY, sunRadio * 3.4, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = colorNucleo;
+                ctx.shadowBlur = 28;
+                ctx.shadowColor = colorNucleo;
+                ctx.beginPath();
+                ctx.arc(sunX, sunY, sunRadio, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            const visibilidadEstrellas = (1 - mezclaTunel) * (climaActual === 'DESPEJADO' ? 1.0 : (climaActual === 'AMANECER' || climaActual === 'ATARDECER' ? 0.35 : 0));
+            if (visibilidadEstrellas > 0.02) {
+                for (let st of estrellasFondo) {
+                    const sx = ((st.x - tren.x * 0.03) % w + w) % w;
+                    if (st.y > alturaVia * 0.75) continue;
+                    const brillo = (0.4 + 0.6 * Math.sin(timestamp * 0.003 + st.fase)) * visibilidadEstrellas;
+                    ctx.globalAlpha = brillo;
+                    ctx.fillStyle = st.color;
+                    ctx.fillRect(sx, st.y, st.tam, st.tam);
+                }
+                ctx.globalAlpha = 1.0;
+            }
+
+            // Oscurecimiento suave al entrar en túnel
+            if (mezclaTunel > 0.01) {
+                ctx.fillStyle = `rgba(1, 3, 10, ${mezclaTunel * 0.72})`;
+                ctx.fillRect(0, 0, w, alturaVia);
+            }
+        }
+
+        // =====================================================================
+        // VISTA EXTERIOR: DIBUJO DE TRENES, TÚNELES, CIUDAD VIVA Y BARRA
+        // =====================================================================
+        function dibujarCabinaExterior(ctx, esDelanteraActiva) {
+            const colorCabina = modoExpreso ? '#ffe600' : '#ff007f';
+            ctx.fillStyle = '#07162c';
+            ctx.strokeStyle = colorCabina;
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = colorCabina;
+
+            ctx.beginPath();
+            ctx.moveTo(0, -22);
+            ctx.bezierCurveTo(65, -22, 115, -4, 130, 8);
+            ctx.lineTo(130, 18);
+            ctx.lineTo(0, 18);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.45)';
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(35, -15);
+            ctx.bezierCurveTo(75, -15, 102, -4, 112, 4);
+            ctx.lineTo(35, 4);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = colorCabina;
+            ctx.fillRect(0, 8, 126, 4);
+
+            ctx.fillStyle = esDelanteraActiva ? '#39ff14' : '#ff0055';
+            ctx.shadowBlur = 18;
+            ctx.shadowColor = esDelanteraActiva ? '#39ff14' : '#ff0055';
+            ctx.beginPath();
+            ctx.arc(124, 11, 4.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (esDelanteraActiva) {
+                ctx.save();
+                ctx.shadowBlur = 0;
+                const gradFaro = ctx.createLinearGradient(126, 11, 370, 26);
+                gradFaro.addColorStop(0, modoExpreso ? 'rgba(255, 230, 0, 0.42)' : 'rgba(57, 255, 20, 0.34)');
+                gradFaro.addColorStop(0.6, 'rgba(0, 240, 255, 0.12)');
+                gradFaro.addColorStop(1, 'rgba(0, 240, 255, 0.0)');
+                ctx.fillStyle = gradFaro;
+                ctx.beginPath();
+                ctx.moveTo(126, 8);
+                ctx.lineTo(370, 22);
+                ctx.lineTo(370, 30);
+                ctx.lineTo(126, 15);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function dibujarTrenMaglev(ctx, x, y, velocidad, dir, inclinacion, flotacionY) {
+            ctx.save();
+            ctx.translate(x, y + flotacionY);
+            ctx.rotate(inclinacion);
+
+            const colorPrincipal = modoExpreso ? '#ff007f' : '#00f0ff';
+            const colorSecundario = modoExpreso ? '#ffe600' : '#ff007f';
+
+            const gradColchon = ctx.createRadialGradient(0, 18, 10, 0, 18, 230);
+            gradColchon.addColorStop(0, modoExpreso ? 'rgba(255, 0, 127, 0.42)' : 'rgba(0, 240, 255, 0.38)');
+            gradColchon.addColorStop(0.55, 'rgba(255, 0, 127, 0.14)');
+            gradColchon.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = gradColchon;
+            ctx.fillRect(-240, 4, 480, 32);
+
+            if (velocidad > 30) {
+                const colaX = -dir * 250;
+                const finEstelaX = -dir * 640;
+                const gradEstela = ctx.createLinearGradient(colaX, 15, finEstelaX, 15);
+                gradEstela.addColorStop(0, modoExpreso ? 'rgba(255, 0, 127, 0.92)' : 'rgba(0, 240, 255, 0.9)');
+                gradEstela.addColorStop(0.5, modoExpreso ? 'rgba(255, 230, 0, 0.55)' : 'rgba(255, 0, 127, 0.5)');
+                gradEstela.addColorStop(1, 'rgba(0, 240, 255, 0.0)');
+                ctx.fillStyle = gradEstela;
+                ctx.beginPath();
+                ctx.moveTo(colaX, 8);
+                ctx.lineTo(finEstelaX, 20);
+                ctx.lineTo(colaX, 24);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            ctx.fillStyle = '#07162c';
+            ctx.strokeStyle = colorPrincipal;
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 18;
+            ctx.shadowColor = colorPrincipal;
+            ctx.beginPath();
+            ctx.roundRect(-130, -22, 260, 40, 4);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.strokeStyle = colorSecundario;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, -21);
+            ctx.lineTo(0, 17);
+            ctx.stroke();
+
+            ctx.fillStyle = colorSecundario;
+            ctx.fillRect(-130, 8, 260, 4);
+
+            ctx.fillStyle = modoExpreso ? 'rgba(255, 230, 0, 0.35)' : 'rgba(0, 240, 255, 0.4)';
+            ctx.strokeStyle = colorPrincipal;
+            ctx.lineWidth = 1.2;
+            for (let wx = -112; wx <= 96; wx += 26) {
+                if (wx > -14 && wx < 10) continue;
+                ctx.beginPath();
+                ctx.roundRect(wx, -13, 18, 12, 3);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            ctx.save();
+            ctx.translate(130, 0);
+            dibujarCabinaExterior(ctx, dir === 1);
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(-130, 0);
+            ctx.scale(-1, 1);
+            dibujarCabinaExterior(ctx, dir === -1);
+            ctx.restore();
+
+            ctx.restore();
+        }
+
+        function dibujarTrenParalelo(ctx, tp, y) {
+            ctx.save();
+            ctx.translate(tp.x, y);
+            ctx.fillStyle = '#051020';
+            ctx.strokeStyle = tp.color;
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = tp.color;
+            ctx.beginPath();
+            ctx.roundRect(-140, -12, 280, 18, 6);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = tp.color;
+            ctx.fillRect(-125, -5, 250, 4);
+            ctx.restore();
+        }
+
+        function dibujarTunelExterior(ctx, tunel, alturaVia, timestamp) {
+            const anchoTunel = tunel.fin - tunel.inicio;
+            const techoTunelY = alturaVia - 135;
+
+            ctx.save();
+            ctx.fillStyle = 'rgba(4, 10, 22, 0.78)';
+            ctx.fillRect(tunel.inicio, techoTunelY, anchoTunel, 150);
+
+            ctx.strokeStyle = tunel.color;
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 16;
+            ctx.shadowColor = tunel.color;
+            ctx.beginPath();
+            ctx.moveTo(tunel.inicio, techoTunelY);
+            ctx.lineTo(tunel.fin, techoTunelY);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            for (let ax = tunel.inicio; ax <= tunel.fin; ax += 180) {
+                const pulso = 0.5 + 0.5 * Math.sin(timestamp * 0.012 - ax * 0.02);
+                ctx.strokeStyle = tunel.color;
+                ctx.globalAlpha = 0.45 + pulso * 0.55;
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(ax, alturaVia + 16);
+                ctx.lineTo(ax, techoTunelY);
+                ctx.lineTo(ax + 35, techoTunelY);
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(ax + 12, techoTunelY + 4, 14, 4);
+            }
+
+            ctx.globalAlpha = 1;
+            ctx.font = 'bold 12px monospace';
+            ctx.fillStyle = tunel.color;
+            ctx.textAlign = 'center';
+            ctx.fillText(`◈ ${tunel.nombre} ◈`, tunel.inicio + anchoTunel * 0.5, techoTunelY - 10);
+            ctx.restore();
+        }
+
+        // =====================================================================
+        // VISTA PRIMERA PERSONA DESDE LA CABINA DEL CONDUCTOR
+        // =====================================================================
+        function dibujarVistaCabina(ctx, w, h, esMovil, estacionProxima, distanciaMinima, tunelActivo, timestamp) {
+            const cx = w * 0.5;
+            const horizonteY = h * 0.44;
+            const colorTema = tunelActivo ? tunelActivo.color : (modoExpreso ? '#ff007f' : '#00f0ff');
+            const colorAcento = modoExpreso ? '#ffe600' : '#39ff14';
+
+            const gradSuelo = ctx.createLinearGradient(0, horizonteY, 0, h);
+            gradSuelo.addColorStop(0, '#040b18');
+            gradSuelo.addColorStop(0.4, '#020610');
+            gradSuelo.addColorStop(1, '#010308');
+            ctx.fillStyle = gradSuelo;
+            ctx.fillRect(0, horizonteY, w, h - horizonteY);
+
+            if (mezclaTunel < 0.92) {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, 1 - mezclaTunel);
+                for (let i = 0; i < 14; i++) {
+                    const lado = i % 2 === 0 ? -1 : 1;
+                    const ciclo = ((tren.x * direccionSentido * 0.0018 + i * 0.28) % 1 + 1) % 1;
+                    const p = Math.pow(ciclo, 2.2);
+                    const distLateral = (w * 0.08) + p * (w * 0.58);
+                    const bx = cx + lado * distLateral;
+                    const bw = 22 + p * 140;
+                    const bh = 45 + p * (h * 0.62);
+                    const by = horizonteY - bh * 0.65;
+
+                    ctx.fillStyle = '#040d1d';
+                    ctx.strokeStyle = i % 3 === 0 ? 'rgba(255, 0, 127, 0.28)' : 'rgba(0, 240, 255, 0.25)';
+                    ctx.lineWidth = 1.2;
+                    ctx.fillRect(bx - bw / 2, by, bw, bh);
+                    ctx.strokeRect(bx - bw / 2, by, bw, bh);
+
+                    ctx.fillStyle = i % 2 === 0 ? 'rgba(0, 240, 255, 0.45)' : 'rgba(255, 0, 127, 0.45)';
+                    ctx.fillRect(bx - bw * 0.2, by + 10, Math.max(2, bw * 0.12), bh * 0.75);
+                }
+                ctx.restore();
+            }
+
+            const anchoViaBase = w * 0.56;
+            const anchoViaHoriz = Math.max(18, w * 0.025);
+
+            const gradPlataforma = ctx.createLinearGradient(0, horizonteY, 0, h);
+            gradPlataforma.addColorStop(0, 'rgba(6, 18, 36, 0.95)');
+            gradPlataforma.addColorStop(1, '#07182e');
+            ctx.fillStyle = gradPlataforma;
+            ctx.beginPath();
+            ctx.moveTo(cx - anchoViaHoriz, horizonteY);
+            ctx.lineTo(cx + anchoViaHoriz, horizonteY);
+            ctx.lineTo(cx + anchoViaBase, h);
+            ctx.lineTo(cx - anchoViaBase, h);
+            ctx.closePath();
+            ctx.fill();
+
+            const faseBobina = ((tren.x * direccionSentido) % 120 + 120) % 120 / 120;
+            for (let k = 0; k < 14; k++) {
+                const t = Math.pow((k + faseBobina) / 14, 2.1);
+                const yBob = horizonteY + t * (h - horizonteY);
+                const medioAncho = anchoViaHoriz + t * (anchoViaBase - anchoViaHoriz);
+                ctx.strokeStyle = `rgba(0, 240, 255, ${0.12 + t * 0.45})`;
+                ctx.lineWidth = 1 + t * 2.5;
+                ctx.beginPath();
+                ctx.moveTo(cx - medioAncho * 0.85, yBob);
+                ctx.lineTo(cx + medioAncho * 0.85, yBob);
+                ctx.stroke();
+            }
+
+            if (mezclaTunel > 0.04) {
+                const colorArco = tunelActivo ? tunelActivo.color : '#00f0ff';
+                for (let k = 0; k < 7; k++) {
+                    const t = Math.pow((k + faseBobina) / 7, 1.8);
+                    const yArcoBase = horizonteY + t * (h * 0.62);
+                    const medioArco = (anchoViaHoriz * 1.6) + t * (w * 0.44);
+                    const altoArco = 34 + t * (h * 0.42);
+                    const pulso = 0.5 + 0.5 * Math.sin(timestamp * 0.015 + k);
+
+                    ctx.strokeStyle = colorArco;
+                    ctx.globalAlpha = (0.25 + pulso * 0.55) * mezclaTunel;
+                    ctx.lineWidth = 1.5 + t * 3.5;
+                    ctx.beginPath();
+                    ctx.moveTo(cx - medioArco, yArcoBase);
+                    ctx.lineTo(cx - medioArco * 0.88, yArcoBase - altoArco);
+                    ctx.lineTo(cx + medioArco * 0.88, yArcoBase - altoArco);
+                    ctx.lineTo(cx + medioArco, yArcoBase);
+                    ctx.stroke();
+                }
+                ctx.globalAlpha = 1;
+            }
+
+            ctx.strokeStyle = colorTema;
+            ctx.lineWidth = 4;
+            ctx.shadowBlur = 16;
+            ctx.shadowColor = colorTema;
+            ctx.beginPath();
+            ctx.moveTo(cx - anchoViaHoriz, horizonteY);
+            ctx.lineTo(cx - anchoViaBase * 0.92, h);
+            ctx.moveTo(cx + anchoViaHoriz, horizonteY);
+            ctx.lineTo(cx + anchoViaBase * 0.92, h);
+            ctx.stroke();
+
+            ctx.strokeStyle = colorAcento;
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(cx, horizonteY);
+            ctx.lineTo(cx, h);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            for (let est of estaciones) {
+                const dist = (est.x - tren.x) * direccionSentido;
+                if (dist > -150 && dist < 3600) {
+                    const progreso = 1 - Math.max(0, dist) / 3600;
+                    const p = Math.pow(progreso, 2.4);
+                    const yBase = horizonteY + p * (h * 0.44);
+                    const medioW = (anchoViaHoriz * 1.4) + p * (w * 0.52);
+                    const altoArco = 26 + p * (h * 0.38);
+
+                    const colorEst = !est.esParadaActiva ? '#64748b' : (est.detenido ? '#00f0ff' : '#39ff14');
+                    ctx.strokeStyle = colorEst;
+                    ctx.lineWidth = 2 + p * 4;
+                    ctx.shadowBlur = est.esParadaActiva ? 16 : 0;
+                    ctx.shadowColor = colorEst;
+
+                    ctx.beginPath();
+                    ctx.moveTo(cx - medioW, yBase);
+                    ctx.lineTo(cx - medioW, yBase - altoArco);
+                    ctx.lineTo(cx + medioW, yBase - altoArco);
+                    ctx.lineTo(cx + medioW, yBase);
+                    ctx.stroke();
+
+                    if (p > 0.18) {
+                        ctx.fillStyle = 'rgba(2, 10, 24, 0.85)';
+                        const cartelW = Math.min(w * 0.7, 90 + p * 260);
+                        const cartelH = 14 + p * 22;
+                        ctx.fillRect(cx - cartelW / 2, yBase - altoArco - cartelH * 0.5, cartelW, cartelH);
+                        ctx.strokeRect(cx - cartelW / 2, yBase - altoArco - cartelH * 0.5, cartelW, cartelH);
+
+                        ctx.font = `bold ${Math.round(8 + p * 11)}px monospace`;
+                        ctx.fillStyle = colorEst;
+                        ctx.textAlign = 'center';
+                        ctx.fillText(est.nombre, cx, yBase - altoArco + cartelH * 0.22);
+                    }
+                    ctx.shadowBlur = 0;
+                }
+            }
+
+            ctx.save();
+            ctx.fillStyle = '#030812';
+            ctx.strokeStyle = colorTema;
+            ctx.lineWidth = 2.5;
+
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(w * 0.14, 0);
+            ctx.lineTo(w * 0.05, h * 0.79);
+            ctx.lineTo(0, h * 0.84);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(w, 0);
+            ctx.lineTo(w * 0.86, 0);
+            ctx.lineTo(w * 0.95, h * 0.79);
+            ctx.lineTo(w, h * 0.84);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            const dashTopY = h * (esMovil ? 0.79 : 0.82);
+            const gradDash = ctx.createLinearGradient(0, dashTopY, 0, h);
+            gradDash.addColorStop(0, '#071426');
+            gradDash.addColorStop(1, '#02060d');
+            ctx.fillStyle = gradDash;
+            ctx.strokeStyle = colorTema;
+            ctx.lineWidth = 2.5;
+
+            ctx.beginPath();
+            ctx.moveTo(0, h * 0.84);
+            ctx.lineTo(w * 0.16, dashTopY);
+            ctx.lineTo(w * 0.84, dashTopY);
+            ctx.lineTo(w, h * 0.84);
+            ctx.lineTo(w, h);
+            ctx.lineTo(0, h);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Velocímetro holográfico en la esquina inferior izquierda (al lado de los pedales)
+            const panelW = esMovil ? Math.min(138, w * 0.36) : 230;
+            const panelH = esMovil ? 56 : 72;
+            const panelX = esMovil ? 8 : 16;
+            const panelY = h - panelH - (esMovil ? 12 : 16);
+
+            ctx.fillStyle = 'rgba(0, 18, 34, 0.92)';
+            ctx.strokeStyle = bloqueoTermico ? '#ff0055' : colorAcento;
+            ctx.lineWidth = 1.6;
+            ctx.beginPath();
+            ctx.roundRect(panelX, panelY, panelW, panelH, 12);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.textAlign = 'center';
+            const panelCx = panelX + panelW / 2;
+            ctx.font = esMovil ? 'bold 14px monospace' : 'bold 20px monospace';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(`${Math.round(tren.velocidad)} KM/H`, panelCx, panelY + (esMovil ? 23 : 30));
+
+            ctx.font = esMovil ? 'bold 8.5px monospace' : 'bold 10.5px monospace';
+            ctx.fillStyle = bloqueoTermico ? '#ff0055' : colorAcento;
+            const infoRadar = bloqueoTermico
+                ? 'ALARMA CRYO-TEMP'
+                : (estacionProxima
+                    ? `${estacionProxima.nombre.split(' (')[0]} (${Math.max(0, Math.round(distanciaMinima))}m)`
+                    : 'TERMINAL');
+            ctx.fillText(infoRadar, panelCx, panelY + (esMovil ? 42 : 52));
+
+            // Variedad en cabina: testigos luminosos de estado en el salpicadero
+            const indX = panelX + panelW + (esMovil ? 8 : 14);
+            const indY = dashTopY + (esMovil ? 7 : 10);
+            const pilotosCabina = [
+                {
+                    etiqueta: 'FRENO',
+                    activo: tren.frenando,
+                    color: '#ff0055'
+                },
+                {
+                    etiqueta: 'TRACCIÓN',
+                    activo: tren.acelerando && !bloqueoTermico,
+                    color: '#39ff14'
+                },
+                {
+                    etiqueta: 'CRYO',
+                    activo: tren.temperaturaMagnetica >= 80 || bloqueoTermico,
+                    color: '#ffe600'
+                },
+                {
+                    etiqueta: 'TÚNEL',
+                    activo: Boolean(tunelActivo),
+                    color: '#00f0ff'
+                }
+            ];
+
+            if (!esMovil || w >= 640) {
+                pilotosCabina.forEach((p, idx) => {
+                    const bx = indX + idx * (esMovil ? 54 : 68);
+                    const bw = esMovil ? 48 : 60;
+                    const bh = esMovil ? 18 : 22;
+                    ctx.fillStyle = p.activo ? `${p.color}28` : 'rgba(8, 18, 32, 0.75)';
+                    ctx.strokeStyle = p.activo ? p.color : 'rgba(148, 163, 184, 0.25)';
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.roundRect(bx, indY, bw, bh, 5);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.font = esMovil ? 'bold 8px monospace' : 'bold 9px monospace';
+                    ctx.fillStyle = p.activo ? p.color : '#64748b';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(p.etiqueta, bx + bw / 2, indY + (esMovil ? 12 : 14));
+                });
+            }
+
+            ctx.restore();
+        }
+
+        function dibujarBarraProgresoRuta(ctx, w, esMovil) {
+            if (estaciones.length === 0) return 95;
+
+            const yTop = esMovil ? 215 : 54;
+            const anchoBarra = esMovil ? Math.min(w - 32, 360) : Math.min(440, w - 390);
+            if (anchoBarra < 160) return yTop;
+
+            const xInicio = esMovil ? (w - anchoBarra) / 2 : w - anchoBarra - 18;
+            const yCentro = yTop + 18;
+
+            ctx.save();
+            ctx.fillStyle = 'rgba(3, 12, 24, 0.84)';
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.roundRect(xInicio - 12, yTop, anchoBarra + 24, 38, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(xInicio, yCentro + 3);
+            ctx.lineTo(xInicio + anchoBarra, yCentro + 3);
+            ctx.stroke();
+
+            const est1X = estaciones[0].x;
+            const estLastX = estaciones[estaciones.length - 1].x;
+            const rangoX = estLastX - est1X;
+
+            estaciones.forEach((est, idx) => {
+                const ratio = (est.x - est1X) / rangoX;
+                const px = xInicio + ratio * anchoBarra;
+
+                ctx.fillStyle = !est.esParadaActiva
+                    ? '#475569'
+                    : (est.detenido ? '#00f0ff' : '#39ff14');
+                ctx.beginPath();
+                ctx.arc(px, yCentro + 3, est.esParadaActiva ? 4.2 : 2.8, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.font = 'bold 9px monospace';
+                ctx.fillStyle = est.esParadaActiva ? '#e2f8ff' : '#64748b';
+                ctx.textAlign = 'center';
+                ctx.fillText(`E${idx + 1}`, px, yCentro - 6);
+            });
+
+            const ratioTren = Math.max(0, Math.min(1, (tren.x - est1X) / rangoX));
+            const trenPx = xInicio + ratioTren * anchoBarra;
+
+            ctx.fillStyle = modoExpreso ? '#ffe600' : '#ff007f';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = modoExpreso ? '#ffe600' : '#ff007f';
+            ctx.beginPath();
+            ctx.arc(trenPx, yCentro + 3, 5.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            ctx.font = 'bold 9px monospace';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.fillText(direccionSentido === 1 ? '▶' : '◀', trenPx, yCentro + 14);
+
+            ctx.restore();
+            return yTop + 42;
+        }
+
+        function obtenerEstacionMasCercanaDelante() {
+            let estacionProxima = null;
+            let distanciaMinima = Infinity;
+            for (let est of estaciones) {
+                if (est.detenido || !est.esParadaActiva) continue;
+                const dist = (est.x - tren.x) * direccionSentido;
+                if (dist > -est.ancho * 0.48 && dist < distanciaMinima) {
+                    distanciaMinima = dist;
+                    estacionProxima = est;
+                }
+            }
+            return { estacionProxima, distanciaMinima };
+        }
+
+        function generarRelampago(w, alturaVia) {
+            intensidadRelampago = 0.55;
+            const startX = w * (0.15 + Math.random() * 0.7);
+            const puntos = [{ x: startX, y: 0 }];
+            let currX = startX;
+            let currY = 0;
+            while (currY < alturaVia * 0.78) {
+                currX += (Math.random() - 0.5) * 65;
+                currY += 35 + Math.random() * 45;
+                puntos.push({ x: currX, y: currY });
+            }
+            rayoActual = { puntos, vida: 0.22 };
+        }
+
+        // =====================================================================
+        // BUCLE PRINCIPAL DE SIMULACIÓN Y RENDERIZADO
+        // =====================================================================
+        function iniciarBucle(timestamp) {
+            if (!activo) return;
+
+            const dt = Math.min(0.05, (timestamp - ultimoFrame) / 1000);
+            ultimoFrame = timestamp;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const esMovil = w <= 820;
+            const escalaMundo = zoomManual !== null ? zoomManual : obtenerEscalaBaseAuto(w);
+            const rutaActual = RUTAS[indiceRuta];
+
+            const alturaVia = h * (esMovil ? 0.68 : 0.72);
+            const alturaViaParalela = h * (esMovil ? 0.54 : 0.56);
+            const tunelActivo = estaEnTunel(tren.x);
+
+            if (climaAuto) {
+                temporizadorClima += dt;
+                if (temporizadorClima >= 24) {
+                    temporizadorClima = 0;
+                    indiceClima = (indiceClima + 1) % CLIMAS.length;
+                    climaActual = CLIMAS[indiceClima];
+                    mensajeMegafonia = `CLIMA / CICLO SOLAR: ${climaActual}`;
+                }
+            }
+
+            actualizarTransicionesAmbiente(dt, tunelActivo);
+
+            if (mezclaTunel < 0.5 && climaActual === 'TORMENTA' && Math.random() < dt * 0.22) {
+                generarRelampago(w, alturaVia);
+            }
+            if (intensidadRelampago > 0) {
+                intensidadRelampago = Math.max(0, intensidadRelampago - dt * 2.2);
+            }
+            if (rayoActual) {
+                rayoActual.vida -= dt;
+                if (rayoActual.vida <= 0) rayoActual = null;
+            }
+
+            const { estacionProxima, distanciaMinima } = obtenerEstacionMasCercanaDelante();
+
+            for (let tp of trenesParalelos) {
+                tp.x += (tp.vel / 3.6) * dt * tp.dir;
+                if (tp.dir === -1 && tp.x < -5000) tp.x = LONGITUD_VIA + 5000;
+                if (tp.dir === 1 && tp.x > LONGITUD_VIA + 5000) tp.x = -5000;
+            }
+
+            for (let av of traficoAereo) {
+                av.x += (av.vel / 3.6) * dt * av.dir;
+                if (av.dir === 1 && av.x > LONGITUD_VIA + 4000) av.x = -2000;
+                if (av.dir === -1 && av.x < -2000) av.x = LONGITUD_VIA + 4000;
+            }
+
+            const velocidadMax = (modoExpreso ? 920 : 750) * rutaActual.factorVel;
+            let inclinacionObjetivo = 0;
+
+            if (estadoRuta === 'EN_MARCHA') {
+                if (pilotoAutomatico) {
+                    const distFrenadoPiloto = modoExpreso ? 1450 : 1150;
+                    if (estacionProxima && distanciaMinima < distFrenadoPiloto) {
+                        const velObjetivoAprox = Math.max(24, (distanciaMinima / distFrenadoPiloto) * (modoExpreso ? 640 : 520));
+                        if (tren.velocidad > velObjetivoAprox) {
+                            tren.frenando = true;
+                            tren.acelerando = false;
+                        } else {
+                            tren.frenando = false;
+                            tren.acelerando = tren.velocidad < velObjetivoAprox - 15;
+                        }
+                    } else {
+                        tren.frenando = false;
+                        const cruceroPiloto = bloqueoTermico ? velocidadMax * 0.45 : (modoExpreso ? 860 : 680) * rutaActual.factorVel;
+                        tren.acelerando = tren.velocidad < cruceroPiloto;
+                    }
+                }
+
+                if (tren.temperaturaMagnetica >= 100 && !bloqueoTermico) {
+                    bloqueoTermico = true;
+                    mensajeMegafonia = '⚠️ ALERTA CRYO-TEMP 100%: POTENCIA LIMITADA HASTA ENFRIAR';
+                }
+                if (bloqueoTermico && tren.temperaturaMagnetica <= 72) {
+                    bloqueoTermico = false;
+                    mensajeMegafonia = '✅ SISTEMA CRYO ESTABILIZADO — POTENCIA RESTAURADA';
+                }
+
+                if (tren.frenando) {
+                    let tasaFrenado = modoExpreso ? 310 : 260;
+                    if (estacionProxima && distanciaMinima > 10 && distanciaMinima < 1600) {
+                        const velMs = tren.velocidad / 3.6;
+                        const deceleracionNecesariaMs2 = (velMs * velMs) / (2 * Math.max(22, distanciaMinima));
+                        const tasaAsistida = deceleracionNecesariaMs2 * 3.6 * 1.15;
+                        tasaFrenado = Math.max(220, Math.min(720, tasaAsistida));
+                    }
+                    tren.velocidad = Math.max(0, tren.velocidad - tasaFrenado * dt);
+                    tren.temperaturaMagnetica = Math.max(30, tren.temperaturaMagnetica - 16 * dt);
+
+                    if (tren.velocidad > 15) {
+                        inclinacionObjetivo = 0.012 * direccionSentido;
+                    }
+                    if (tren.velocidad > 60) {
+                        emitirChispasFreno(tren.x, alturaVia, direccionSentido);
+                    }
+                } else if (tren.acelerando) {
+                    const limiteVelActual = bloqueoTermico ? velocidadMax * 0.48 : velocidadMax;
+                    const aceleracion = (modoExpreso ? 255 : 210) * rutaActual.factorVel;
+                    if (tren.velocidad < limiteVelActual) {
+                        tren.velocidad = Math.min(limiteVelActual, tren.velocidad + aceleracion * dt);
+                    } else {
+                        tren.velocidad = Math.max(limiteVelActual, tren.velocidad - 35 * dt);
+                    }
+                    const subidaTemp = modoExpreso ? 9.5 : 6.8;
+                    tren.temperaturaMagnetica = Math.min(100, tren.temperaturaMagnetica + subidaTemp * dt);
+                    if (tren.velocidad < limiteVelActual - 10) {
+                        inclinacionObjetivo = -0.01 * direccionSentido;
+                    }
+                } else {
+                    tren.velocidad = Math.max(0, tren.velocidad - 8 * dt);
+                    tren.temperaturaMagnetica = Math.max(30, tren.temperaturaMagnetica - 7.5 * dt);
+                }
+
+                const velMetrosSeg = tren.velocidad / 3.6;
+                tren.x += velMetrosSeg * dt * direccionSentido;
+
+                if (tren.velocidad > 30) {
+                    emitirPlasmaMaglev(tren.x, alturaVia, direccionSentido);
+                }
+
+                for (let est of estaciones) {
+                    if (est.detenido || !est.esParadaActiva || est.superada) continue;
+                    const distAdelante = (est.x - tren.x) * direccionSentido;
+                    if (distAdelante < -est.ancho * 0.55) {
+                        est.superada = true;
+                        rachaParadas = 0;
+                        ultimaValoracion = {
+                            texto: `¡ESTACIÓN SALTADA! (${est.nombre.split(' (')[0]})`,
+                            color: '#ff0055',
+                            tiempo: timestamp
+                        };
+                        mensajeMegafonia = `ATENCIÓN: ESTACIÓN ${est.nombre.split(' (')[0]} REBASADA`;
+                    }
+                }
+
+                for (let est of estaciones) {
+                    if (est.detenido || !est.esParadaActiva) continue;
+                    const distCentro = Math.abs(tren.x - est.x);
+                    if (distCentro <= est.ancho * 0.48 && tren.velocidad <= 65) {
+                        const errorMetros = Math.round(distCentro);
+                        let puntosGanados = 30;
+                        let etiqueta = 'PARADA APURADA';
+                        let colorVal = '#ffe600';
+
+                        if (errorMetros <= 35) {
+                            puntosGanados = 150;
+                            etiqueta = '¡PARADA PERFECTA!';
+                            colorVal = '#39ff14';
+                            tocarTonoParadaPerfecta();
+                        } else if (errorMetros <= 110) {
+                            puntosGanados = 80;
+                            etiqueta = 'BUENA PARADA';
+                            colorVal = '#00f0ff';
+                        }
+
+                        rachaParadas++;
+                        const bonusRacha = (rachaParadas - 1) * 15;
+                        const totalGanado = puntosGanados + bonusRacha;
+                        puntuacion += totalGanado;
+
+                        const nuevoRango = calcularRangoConductor(puntuacion);
+                        if (nuevoRango !== rangoActual) {
+                            rangoActual = nuevoRango;
+                            mensajeMegafonia = `🏅 ¡NUEVO RANGO ALCANZADO: ${rangoActual}!`;
+                        }
+
+                        ultimaValoracion = {
+                            texto: `${etiqueta} (+${totalGanado} PTS | ${errorMetros}m)`,
+                            color: colorVal,
+                            tiempo: timestamp
+                        };
+
+                        tren.x = est.x;
+                        tren.velocidad = 0;
+                        tren.frenando = false;
+                        tren.acelerando = false;
+                        btnFreno.classList.remove('activo');
+                        btnAcelerar.classList.remove('activo');
+
+                        est.detenido = true;
+                        estadoRuta = 'ESTACION';
+                        estacionesVisitadas++;
+                        tren.pasajeros += Math.floor(25 + Math.random() * 35);
+                        mostrarAvisoEstacion = false;
+                        tocarDingDongPuertas();
+
+                        const esTerminalFinal = (direccionSentido === 1 && est.id === estaciones.length - 1) ||
+                                                (direccionSentido === -1 && est.id === 0);
+
+                        if (esTerminalFinal || estacionesVisitadas >= totalParadasRuta) {
+                            invertirSentidoBucle(est, false);
+                        } else {
+                            mensajeRuta = `¡EN ${est.nombre}! SUBIDA DE PASAJEROS...`;
+                            mensajeMegafonia = `PUERTAS ABIERTAS EN ${est.nombre.split(' (')[0]}`;
+                        }
+                        tiempoFinRuta = 0;
+                        break;
+                    }
+                }
+
+                if (estadoRuta === 'EN_MARCHA') {
+                    if (direccionSentido === 1 && tren.x >= LIMITE_SEGURIDAD_DER) {
+                        const ultimaEst = estaciones[estaciones.length - 1];
+                        tren.x = ultimaEst.x;
+                        tren.velocidad = 0;
+                        tren.frenando = false;
+                        tren.acelerando = false;
+                        btnFreno.classList.remove('activo');
+                        btnAcelerar.classList.remove('activo');
+                        rachaParadas = 0;
+                        estadoRuta = 'ESTACION';
+                        tiempoFinRuta = 0;
+                        tocarDingDongPuertas();
+                        invertirSentidoBucle(ultimaEst, true);
+                    } else if (direccionSentido === -1 && tren.x <= LIMITE_SEGURIDAD_IZQ) {
+                        const primeraEst = estaciones[0];
+                        tren.x = primeraEst.x;
+                        tren.velocidad = 0;
+                        tren.frenando = false;
+                        tren.acelerando = false;
+                        btnFreno.classList.remove('activo');
+                        btnAcelerar.classList.remove('activo');
+                        rachaParadas = 0;
+                        estadoRuta = 'ESTACION';
+                        tiempoFinRuta = 0;
+                        tocarDingDongPuertas();
+                        invertirSentidoBucle(primeraEst, true);
+                    }
+                }
+            } else if (estadoRuta === 'ESTACION') {
+                tiempoFinRuta += dt;
+                tren.velocidad = 0;
+                if (tiempoFinRuta >= 3.0) {
+                    estadoRuta = 'EN_MARCHA';
+                    const { estacionProxima: sig } = obtenerEstacionMasCercanaDelante();
+                    mensajeMegafonia = sig
+                        ? `PRÓXIMA PARADA: ${sig.nombre.split(' (')[0]}`
+                        : 'EN MARCHA HACIA SIGUIENTE SECTOR';
+                }
+            }
+
+            tren.inclinacion += (inclinacionObjetivo - tren.inclinacion) * Math.min(1, dt * 8);
+            const flotacionY = Math.sin(timestamp * 0.0045) * (tren.velocidad < 10 ? 1.8 : 0.7);
+
+            let shakeX = 0;
+            let shakeY = 0;
+            if (tren.velocidad > 680 || (tren.frenando && tren.velocidad > 250)) {
+                const intensidadShake = tren.frenando ? 1.6 : ((tren.velocidad - 680) / 240) * 1.8;
+                shakeX = (Math.random() - 0.5) * intensidadShake;
+                shakeY = (Math.random() - 0.5) * intensidadShake;
+            }
+
+            actualizarSonidoMotor(tren.velocidad, tren.frenando);
+
+            // =================================================================
+            // RENDERIZADO PRINCIPAL (EXTERIOR O CABINA)
+            // =================================================================
+            ctx.save();
+            ctx.translate(shakeX, shakeY);
+
+            dibujarCieloYClimaBase(ctx, w, h, alturaVia, timestamp);
+
+            if (intensidadRelampago > 0) {
+                ctx.fillStyle = `rgba(180, 235, 255, ${intensidadRelampago * 0.25})`;
+                ctx.fillRect(0, 0, w, alturaVia);
+            }
+            if (rayoActual) {
+                ctx.save();
+                ctx.strokeStyle = `rgba(224, 242, 254, ${rayoActual.vida * 4})`;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#00f0ff';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                rayoActual.puntos.forEach((pt, i) => {
+                    if (i === 0) ctx.moveTo(pt.x, pt.y);
+                    else ctx.lineTo(pt.x, pt.y);
+                });
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            if (vistaCabina) {
+                dibujarVistaCabina(ctx, w, h, esMovil, estacionProxima, distanciaMinima, tunelActivo, timestamp);
+            } else {
+                const gradHorizonte = ctx.createRadialGradient(w * 0.5, alturaVia, 20, w * 0.5, alturaVia, w * 0.65);
+                gradHorizonte.addColorStop(0, modoExpreso ? 'rgba(255, 0, 127, 0.16)' : 'rgba(0, 240, 255, 0.14)');
+                gradHorizonte.addColorStop(0.5, 'rgba(255, 0, 127, 0.06)');
+                gradHorizonte.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.fillStyle = gradHorizonte;
+                ctx.fillRect(0, 0, w, alturaVia);
+
+                if (tren.velocidad > 90) {
+                    ctx.save();
+                    const intensidadLinea = (tren.velocidad / velocidadMax) * 0.48;
+                    ctx.strokeStyle = modoExpreso
+                        ? `rgba(255, 0, 127, ${intensidadLinea})`
+                        : `rgba(0, 240, 255, ${intensidadLinea})`;
+                    ctx.lineWidth = 1.5;
+                    for (let l of lineasVelocidad) {
+                        l.x -= (tren.velocidad * 0.45 * l.velocidadFactor * direccionSentido) * dt;
+                        if (l.x < 0) l.x = w + Math.random() * 100;
+                        if (l.x > w) l.x = -Math.random() * 100;
+
+                        ctx.beginPath();
+                        ctx.moveTo(l.x, l.y);
+                        ctx.lineTo(l.x - (l.longitud * direccionSentido), l.y);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                }
+
+                ctx.save();
+                ctx.translate(w / 2, alturaVia);
+                ctx.scale(escalaMundo, escalaMundo);
+                ctx.translate(-tren.x, -alturaVia);
+
+                const anchoVisibleMundo = (w / escalaMundo) * 0.9;
+                const minMundoX = tren.x - anchoVisibleMundo;
+                const maxMundoX = tren.x + anchoVisibleMundo;
+
+                for (let ed of edificiosFondo) {
+                    if (ed.x + ed.ancho < minMundoX || ed.x > maxMundoX) continue;
+
+                    const techoY = alturaVia - ed.alto;
+                    ctx.fillStyle = climaActual === 'SOLEADO' ? '#0f233c' : '#040b16';
+                    ctx.fillRect(ed.x, techoY, ed.ancho, ed.alto);
+
+                    ctx.strokeStyle = 'rgba(0, 240, 255, 0.16)';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(ed.x, techoY, ed.ancho, ed.alto);
+
+                    if (ed.antena) {
+                        const cxAntena = ed.x + ed.ancho * 0.5;
+                        ctx.strokeStyle = '#334155';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(cxAntena, techoY);
+                        ctx.lineTo(cxAntena, techoY - 34);
+                        ctx.stroke();
+
+                        const pulsoBaliza = 0.35 + 0.65 * Math.abs(Math.sin(timestamp * 0.005 + ed.x));
+                        ctx.fillStyle = ed.colorBaliza;
+                        ctx.globalAlpha = pulsoBaliza;
+                        ctx.beginPath();
+                        ctx.arc(cxAntena, techoY - 36, 3.2, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.globalAlpha = 1.0;
+                    }
+
+                    ctx.fillStyle = ed.colorVentana;
+                    for (let wx = ed.x + 12; wx < ed.x + ed.ancho - 12; wx += 18) {
+                        for (let wy = techoY + 20; wy < alturaVia - 24; wy += 28) {
+                            ctx.fillRect(wx, wy, 8, 12);
+                        }
+                    }
+
+                    if (ed.tieneCartel && ed.alto > 270) {
+                        const cartelY = techoY + 52;
+                        const cartelW = Math.min(ed.ancho - 14, 76);
+                        const cartelX = ed.x + (ed.ancho - cartelW) / 2;
+                        ctx.fillStyle = 'rgba(2, 8, 18, 0.9)';
+                        ctx.strokeStyle = ed.colorCartel;
+                        ctx.lineWidth = 1.4;
+                        ctx.fillRect(cartelX, cartelY, cartelW, 18);
+                        ctx.strokeRect(cartelX, cartelY, cartelW, 18);
+
+                        ctx.font = 'bold 9px monospace';
+                        ctx.fillStyle = ed.colorCartel;
+                        ctx.textAlign = 'center';
+                        ctx.fillText(ed.textoCartel, cartelX + cartelW / 2, cartelY + 12);
+                    }
+                }
+
+                for (let av of traficoAereo) {
+                    if (av.x + 120 < minMundoX || av.x - 120 > maxMundoX) continue;
+                    const ay = alturaVia - av.altOffset + Math.sin(timestamp * 0.004 + av.fase) * 8;
+                    ctx.save();
+                    ctx.translate(av.x, ay);
+                    ctx.fillStyle = '#08172b';
+                    ctx.strokeStyle = av.color;
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.roundRect(-14, -4, 28, 8, 4);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = av.color;
+                    ctx.fillRect(-av.dir * 26, -1, 14, 2);
+                    ctx.restore();
+                }
+
+                ctx.fillStyle = 'rgba(8, 22, 38, 0.85)';
+                ctx.fillRect(-8000, alturaViaParalela + 6, LONGITUD_VIA + 16000, 10);
+                ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(-8000, alturaViaParalela + 6);
+                ctx.lineTo(LONGITUD_VIA + 16000, alturaViaParalela + 6);
+                ctx.stroke();
+
+                for (let tp of trenesParalelos) {
+                    if (tp.x + 300 < minMundoX || tp.x - 300 > maxMundoX) continue;
+                    dibujarTrenParalelo(ctx, tp, alturaViaParalela);
+                }
+
+                const gradReflejoVia = ctx.createLinearGradient(0, alturaVia + 18, 0, alturaVia + 54);
+                gradReflejoVia.addColorStop(0, modoExpreso ? 'rgba(255, 0, 127, 0.35)' : 'rgba(0, 240, 255, 0.32)');
+                gradReflejoVia.addColorStop(1, 'rgba(4, 12, 24, 0.92)');
+                ctx.fillStyle = gradReflejoVia;
+                ctx.fillRect(-8000, alturaVia + 18, LONGITUD_VIA + 16000, 36);
+
+                ctx.strokeStyle = modoExpreso ? '#ff007f' : '#00f0ff';
+                ctx.lineWidth = 3.5;
+                ctx.shadowBlur = 18;
+                ctx.shadowColor = modoExpreso ? '#ff007f' : '#00f0ff';
+                ctx.beginPath();
+                ctx.moveTo(-8000, alturaVia + 18);
+                ctx.lineTo(LONGITUD_VIA + 16000, alturaVia + 18);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                ctx.strokeStyle = modoExpreso ? 'rgba(255, 230, 0, 0.45)' : 'rgba(255, 0, 127, 0.42)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(-8000, alturaVia + 27);
+                ctx.lineTo(LONGITUD_VIA + 16000, alturaVia + 27);
+                ctx.stroke();
+
+                [LIMITE_SEGURIDAD_IZQ, LIMITE_SEGURIDAD_DER].forEach((topeX) => {
+                    if (topeX < minMundoX - 100 || topeX > maxMundoX + 100) return;
+                    ctx.fillStyle = '#ff0055';
+                    ctx.shadowBlur = 16;
+                    ctx.shadowColor = '#ff0055';
+                    ctx.fillRect(topeX - 8, alturaVia - 35, 16, 55);
+                    ctx.shadowBlur = 0;
+                });
+
+                for (let px of postesVia) {
+                    if (px < minMundoX - 40 || px > maxMundoX + 40) continue;
+                    ctx.fillStyle = '#0b1d32';
+                    ctx.fillRect(px - 6, alturaVia + 54, 12, (h / escalaMundo));
+                    ctx.fillStyle = (Math.abs(px) % 240 === 0) ? '#00f0ff' : '#ff007f';
+                    ctx.fillRect(px - 2, alturaVia + 64, 4, 8);
+                }
+
+                for (let est of estaciones) {
+                    if (est.x + est.ancho < minMundoX || est.x - est.ancho > maxMundoX) continue;
+
+                    const distAlTren = (est.x - tren.x) * direccionSentido;
+                    const acercandose = est.esParadaActiva && !est.detenido && distAlTren > 0 && distAlTren < 2400;
+
+                    let colorEst = '#39ff14';
+                    if (!est.esParadaActiva) {
+                        colorEst = '#475569';
+                    } else if (est.detenido) {
+                        colorEst = '#00f0ff';
+                    } else if (acercandose) {
+                        colorEst = '#ffe600';
+                    }
+
+                    ctx.save();
+
+                    if (est.esParadaActiva) {
+                        const gradEst = ctx.createRadialGradient(est.x, alturaVia - 50, 20, est.x, alturaVia - 50, est.ancho * 0.65);
+                        gradEst.addColorStop(0, est.detenido ? 'rgba(0, 240, 255, 0.2)' : (acercandose ? 'rgba(255, 230, 0, 0.22)' : 'rgba(57, 255, 20, 0.2)'));
+                        gradEst.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                        ctx.fillStyle = gradEst;
+                        ctx.fillRect(est.x - est.ancho * 0.7, alturaVia - 160, est.ancho * 1.4, 180);
+                    }
+
+                    ctx.fillStyle = est.esParadaActiva ? 'rgba(8, 24, 40, 0.92)' : 'rgba(6, 12, 22, 0.75)';
+                    ctx.strokeStyle = colorEst;
+                    ctx.lineWidth = est.esParadaActiva ? 2.5 : 1.5;
+                    ctx.shadowBlur = est.esParadaActiva ? 18 : 0;
+                    ctx.shadowColor = colorEst;
+                    ctx.beginPath();
+                    ctx.roundRect(est.x - est.ancho / 2, alturaVia - 125, est.ancho, 140, 10);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = est.esParadaActiva ? `${colorEst}55` : 'rgba(71, 85, 105, 0.25)';
+                    ctx.fillRect(est.x - est.ancho / 2, alturaVia + 14, est.ancho, 8);
+
+                    if (est.esParadaActiva) {
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(est.x - 2, alturaVia - 18, 4, 30);
+                    }
+
+                    ctx.textAlign = 'center';
+                    ctx.font = 'bold 14px monospace';
+                    ctx.fillStyle = colorEst;
+                    ctx.fillText(est.nombre, est.x, alturaVia - 82);
+
+                    ctx.font = '12px monospace';
+                    if (!est.esParadaActiva) {
+                        ctx.fillStyle = '#94a3b8';
+                        ctx.fillText('⏩ PASO SIN PARADA (SERVICIO EXPRESO)', est.x, alturaVia - 58);
+                    } else if (!est.detenido) {
+                        ctx.fillStyle = '#ffe600';
+                        ctx.fillText('▼ ZONA DE PARADA ASISTIDA ▼', est.x, alturaVia - 58);
+                    }
+                    ctx.restore();
+                }
+
+                for (let i = particulasPlasma.length - 1; i >= 0; i--) {
+                    let p = particulasPlasma[i];
+                    p.x += p.vx * dt;
+                    p.y += p.vy * dt;
+                    p.vida -= dt;
+                    if (p.vida <= 0) {
+                        particulasPlasma.splice(i, 1);
+                        continue;
+                    }
+                    ctx.globalAlpha = p.vida * 2;
+                    ctx.fillStyle = p.color || '#00f0ff';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.tam, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                for (let i = chispasFreno.length - 1; i >= 0; i--) {
+                    let c = chispasFreno[i];
+                    c.x += c.vx * dt;
+                    c.y += c.vy * dt;
+                    c.vy += 380 * dt;
+                    c.vida -= dt;
+                    if (c.vida <= 0) {
+                        chispasFreno.splice(i, 1);
+                        continue;
+                    }
+                    ctx.globalAlpha = Math.min(1, c.vida * 3.2);
+                    ctx.fillStyle = c.color;
+                    ctx.beginPath();
+                    ctx.arc(c.x, c.y, c.tam, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.globalAlpha = 1.0;
+
+                dibujarTrenMaglev(ctx, tren.x, alturaVia, tren.velocidad, direccionSentido, tren.inclinacion, flotacionY);
+
+                for (let t of tuneles) {
+                    if (t.fin < minMundoX || t.inicio > maxMundoX) continue;
+                    dibujarTunelExterior(ctx, t, alturaVia, timestamp);
+                }
+
+                ctx.restore();
+            }
+
+            if (mezclaTunel < 0.85 && (climaActual === 'LLUVIA' || climaActual === 'TORMENTA')) {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, 1 - mezclaTunel);
+                ctx.lineWidth = climaActual === 'TORMENTA' ? 1.5 : 1.2;
+                const factorTormenta = climaActual === 'TORMENTA' ? 1.45 : 1.0;
+                const vientoX = vistaCabina
+                    ? ((Math.random() - 0.5) * 40)
+                    : -(60 + (tren.velocidad / velocidadMax) * 340 * direccionSentido) * factorTormenta;
+                for (let g of gotasLluvia) {
+                    g.x += vientoX * dt;
+                    g.y += g.velY * factorTormenta * dt;
+                    if (g.y > h) {
+                        g.y = -20;
+                        g.x = Math.random() * w;
+                    }
+                    if (g.x < 0) g.x += w;
+                    if (g.x > w) g.x -= w;
+
+                    ctx.strokeStyle = g.color;
+                    ctx.beginPath();
+                    ctx.moveTo(g.x, g.y);
+                    ctx.lineTo(g.x + vientoX * 0.025, g.y + g.largo);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            const opacidadNiebla = cieloSuavizado.nieblaAlpha * (1 - mezclaTunel * 0.8);
+            if (opacidadNiebla > 0.02) {
+                const gradNiebla = ctx.createLinearGradient(0, alturaVia - 220, 0, h);
+                gradNiebla.addColorStop(0, 'rgba(10, 25, 47, 0.0)');
+                gradNiebla.addColorStop(0.5, `rgba(14, 38, 68, ${opacidadNiebla * 0.55})`);
+                gradNiebla.addColorStop(1, `rgba(6, 18, 36, ${opacidadNiebla})`);
+                ctx.fillStyle = gradNiebla;
+                ctx.fillRect(0, alturaVia - 220, w, h - (alturaVia - 220));
+            }
+
+            // =================================================================
+            // INTERFAZ HUD ADAPTATIVA (MÓVIL Y ESCRITORIO)
+            // =================================================================
+            const hudX = esMovil ? 10 : 14;
+            const hudY = esMovil ? 58 : 14;
+            const hudW = esMovil ? Math.min(w - 20, 360) : 340;
+            const hudH = esMovil ? 156 : 176;
+
+            ctx.save();
+            ctx.fillStyle = 'rgba(3, 12, 24, 0.86)';
+            ctx.strokeStyle = modoExpreso ? 'rgba(255, 0, 127, 0.5)' : 'rgba(0, 240, 255, 0.42)';
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.roundRect(hudX, hudY, hudW, hudH, 12);
+            ctx.fill();
+            ctx.stroke();
+
+            const tx = hudX + 12;
+            const barraX = hudX + 94;
+            const barraW = hudW - 108;
+
+            ctx.textAlign = 'left';
+            ctx.font = esMovil ? 'bold 10.5px monospace' : 'bold 11.5px monospace';
+            ctx.fillStyle = modoExpreso ? '#ff66b2' : '#00f0ff';
+            ctx.fillText(`${rutaActual.etiqueta} | TRAY #${numeroLinea} | PAR: ${estacionesVisitadas}/${totalParadasRuta}`, tx, hudY + 19);
+
+            ctx.font = esMovil ? '11px monospace' : '12px monospace';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(`VEL: ${Math.round(tren.velocidad)} km/h (${direccionSentido === 1 ? '➡ IDA' : '⬅ VUELTA'})`, tx, hudY + 38);
+
+            ctx.fillStyle = '#ffe600';
+            const textoDist = estacionProxima ? `${Math.max(0, Math.round(distanciaMinima))} m` : 'TERMINAL';
+            ctx.fillText(`PRÓX: ${textoDist} | PTS: ${puntuacion} | ${rangoActual}`, tx, hudY + 57);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText('POTENCIA:', tx, hudY + 77);
+            ctx.fillStyle = '#020812';
+            ctx.fillRect(barraX, hudY + 67, barraW, 10);
+            const potenciaRatio = bloqueoTermico ? 0.45 : (tren.velocidad / velocidadMax);
+            ctx.fillStyle = bloqueoTermico ? '#ff0055' : (modoExpreso ? '#ff007f' : '#39ff14');
+            ctx.fillRect(barraX, hudY + 67, barraW * Math.min(1, potenciaRatio), 10);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText('CRYO-TEMP:', tx, hudY + 97);
+            ctx.fillStyle = '#020812';
+            ctx.fillRect(barraX, hudY + 87, barraW, 10);
+            ctx.fillStyle = tren.temperaturaMagnetica >= 85 ? '#ff0055' : (tren.temperaturaMagnetica >= 65 ? '#ffe600' : '#00f0ff');
+            ctx.fillRect(barraX, hudY + 87, barraW * (tren.temperaturaMagnetica / 100), 10);
+
+            ctx.fillStyle = '#94a3b8';
+            const textoModo = pilotoAutomatico ? 'PILOTO' : 'MANUAL';
+            const estadoEntorno = tunelActivo ? tunelActivo.nombre : climaActual;
+            ctx.fillText(`PAX: ${tren.pasajeros} | ${textoModo} | ${estadoEntorno}`, tx, hudY + 117);
+
+            ctx.font = 'bold 10px monospace';
+            ctx.fillStyle = bloqueoTermico ? '#ff0055' : '#38bdf8';
+            const maxChars = esMovil ? 40 : 46;
+            const textoMegaCorto = mensajeMegafonia.length > maxChars ? mensajeMegafonia.slice(0, maxChars - 1) + '…' : mensajeMegafonia;
+            ctx.fillText(`📢 ${textoMegaCorto}`, tx, hudY + (esMovil ? 138 : 149));
+            ctx.restore();
+
+            const baseYBarra = dibujarBarraProgresoRuta(ctx, w, esMovil) || 95;
+
+            if (estacionProxima && distanciaMinima > 0 && distanciaMinima < 2400 && !estacionProxima.avisoMostrado && estadoRuta === 'EN_MARCHA') {
+                estacionActualAvisada = estacionProxima;
+                tiempoAvisoInicio = timestamp;
+                mostrarAvisoEstacion = true;
+                estacionProxima.avisoMostrado = true;
+                tocarTonoAvisoEstacion();
+            }
+
+            if (mostrarAvisoEstacion && (timestamp - tiempoAvisoInicio) > 5000) {
+                mostrarAvisoEstacion = false;
+            }
+
+            if (mostrarAvisoEstacion && estacionActualAvisada && estadoRuta === 'EN_MARCHA') {
+                ctx.save();
+                const parpadeo = Math.sin(timestamp * 0.025) > 0;
+                if (parpadeo) {
+                    const yBanner = esMovil ? baseYBarra + 6 : Math.max(198, baseYBarra + 8);
+                    ctx.fillStyle = 'rgba(255, 230, 0, 0.22)';
+                    ctx.fillRect(0, yBanner, w, 34);
+                    ctx.strokeStyle = '#ffe600';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(0, yBanner, w, 34);
+
+                    ctx.textAlign = 'center';
+                    ctx.font = esMovil ? 'bold 11px monospace' : 'bold 14px monospace';
+                    ctx.fillStyle = '#ffe600';
+                    ctx.shadowBlur = 14;
+                    ctx.shadowColor = '#ffe600';
+                    const textoAccion = pilotoAutomatico ? 'PILOTO FRENANDO' : 'PULSE FRENAR';
+                    ctx.fillText(
+                        `⚠️ ${estacionActualAvisada.nombre} A ${Math.round(Math.abs(estacionActualAvisada.x - tren.x))}m — ${textoAccion}`,
+                        w / 2,
+                        yBanner + 21
+                    );
+                }
+                ctx.restore();
+            }
+
+            if (ultimaValoracion && (timestamp - ultimaValoracion.tiempo) < 3500) {
+                const alphaVal = Math.min(1, (3500 - (timestamp - ultimaValoracion.tiempo)) / 700);
+                ctx.save();
+                ctx.globalAlpha = alphaVal;
+                ctx.textAlign = 'center';
+                ctx.font = esMovil ? 'bold 15px monospace' : 'bold 20px monospace';
+                ctx.fillStyle = ultimaValoracion.color;
+                ctx.shadowBlur = 16;
+                ctx.shadowColor = ultimaValoracion.color;
+                ctx.fillText(ultimaValoracion.texto, w / 2, h * (esMovil ? 0.36 : 0.28));
+                ctx.restore();
+            }
+
+            if (estadoRuta === 'ESTACION') {
+                ctx.fillStyle = 'rgba(0, 5, 15, 0.85)';
+                ctx.fillRect(0, h * 0.36, w, 105);
+
+                ctx.textAlign = 'center';
+                ctx.font = esMovil ? 'bold 18px sans-serif' : 'bold 26px sans-serif';
+                ctx.fillStyle = '#39ff14';
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#39ff14';
+                ctx.fillText(mensajeRuta, w / 2, h * 0.43);
+
+                ctx.shadowBlur = 0;
+                ctx.font = esMovil ? '14px sans-serif' : '17px sans-serif';
+                ctx.fillStyle = '#00f0ff';
+                const segundosRestantes = Math.max(1, Math.ceil(3.0 - tiempoFinRuta));
+                ctx.fillText(`Embarque de pasajeros (${segundosRestantes}s)...`, w / 2, h * 0.49);
+            }
+
+            ctx.restore();
+            ctx.restore();
+
+            animacionId = requestAnimationFrame(iniciarBucle);
+        }
+    </script>
+</body>
+</html>
