@@ -544,7 +544,7 @@
             inicializarAudio();
             if (!audioActivo || !audioCtx) return;
             const ahora = audioCtx.currentTime;
-            const freqs = [277.18, 349.23];
+            const freqs = [110.00, 138.59, 196.00];
             freqs.forEach((f) => {
                 const osc = audioCtx.createOscillator();
                 const filtro = audioCtx.createBiquadFilter();
@@ -552,10 +552,10 @@
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(f, ahora);
                 filtro.type = 'lowpass';
-                filtro.frequency.setValueAtTime(950, ahora);
+                filtro.frequency.setValueAtTime(760, ahora);
 
-                gain.gain.setValueAtTime(0.001, ahora);
-                gain.gain.linearRampToValueAtTime(0.045, ahora + 0.04);
+                gain.gain.setValueAtTime(0.008, ahora);
+                gain.gain.linearRampToValueAtTime(0.045, ahora + 0.0035);
                 gain.gain.exponentialRampToValueAtTime(0.0008, ahora + 0.45);
 
                 osc.connect(filtro);
