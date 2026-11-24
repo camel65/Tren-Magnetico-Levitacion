@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tren Magnetico Levitacion</title>
+    <title>Tren Levitacion Magnetica</title>
     <style>
         * {
             margin: 0;
@@ -376,21 +376,21 @@
                 etiqueta: 'L1 CENTRO',
                 factorVel: 1.0,
                 color: '#00f0ff',
-                estaciones: ['MADRID', 'GUADALAJARA', 'ZARAGOZA', 'LLEIDA', 'TARRAGONA', 'BARCELONA SANTS']
+                estaciones: ['HUESCA', 'ZARAGOZA', 'CALATAYUD', 'GUADALAJARA', 'MADRID', 'TOLEDO']
             },
             {
                 id: 1,
                 etiqueta: 'L2 COSTERA',
                 factorVel: 1.08,
                 color: '#39ff14',
-                estaciones: ['BARCELONA', 'TARRAGONA', 'PEÑÍSCOLA', 'CASTELLÓN', 'VALENCIA', 'ALICANTE']
+                estaciones: ['BARCELONA', 'TARRAGONA', 'TERRES DEL EBRE', 'PEÑISCOLA', 'CASTELLON DE LA PLANA', 'VALENCIA']
             },
             {
                 id: 2,
                 etiqueta: 'L3 ORBITAL',
                 factorVel: 1.16,
                 color: '#ff007f',
-                estaciones: ['LEÓN', 'SALAMANCA', 'ÁVILA', 'TOLEDO', 'SEVILLA', 'MÁLAGA']
+                estaciones: ['BILBAO', 'BURGOS', 'LEÓN', 'SALAMANCA', 'VALLADOLID', 'ÁVILA']
             }
         ];
         let indiceRuta = 0;
@@ -493,13 +493,13 @@
                     motorGain = audioCtx.createGain();
 
                     motorOsc.type = 'sine';
-                    motorSubOsc.type = 'sine';
-                    motorOsc.frequency.value = 45;
-                    motorSubOsc.frequency.value = 90;
+                    motorSubOsc.type = 'triangle'; // *cambio sine por triangle
+                    motorOsc.frequency.value = 46; // *cambio 45 por 46
+                    motorSubOsc.frequency.value = 92; // *cambio 90 por 92
 
                     motorFiltro.type = 'lowpass';
-                    motorFiltro.frequency.value = 240;
-                    motorFiltro.Q.value = 0.7;
+                    motorFiltro.frequency.value = 180; // *cambio 240 por 180
+                    motorFiltro.Q.value = 0.6; // *cambio 0.7 por 0.6
 
                     motorGain.gain.value = 0;
 
@@ -525,15 +525,19 @@
             }
             const velMaxRef = modoExpreso ? 920 : 750;
             const ratio = Math.min(1, velocidad / velMaxRef);
-            const freqBase = 42 + ratio * (modoExpreso ? 88 : 72);
-            const freqArmonico = frenando ? freqBase * 1.25 : freqBase * 1.5;
-            const corteFiltro = 160 + ratio * 240;
-            const volumen = Math.min(0.048, 0.012 + ratio * 0.032);
+            const freqBase = 55 + ratio * (modoExpreso ? 76 : 62); // *cambio 42 por 44 y 88 : 72 por 76 : 62
+            const freqArmonico = frenando ? freqBase * 1.2 : freqBase * 1.5; // * cambio 1.25 por 1.2
+            const corteFiltro = 160 + ratio * 240; // *cambio 160 por 150 y 240 por 210
+            
+           const baseVol = vistaCabina ? 0.11 : 0.14; // *añadido nuevo         
+           const volumen = Math.min(0.18, baseVol * (0.35 + ratio * 0.65));
+ // *cambio Math.min(0.048, 0.012 + ratio * 0.032); por Math.min(0.18, baseVol * (0.35 + ratio * 0.65));
 
-            motorOsc.frequency.setTargetAtTime(freqBase, audioCtx.currentTime, 0.1);
-            motorSubOsc.frequency.setTargetAtTime(freqArmonico, audioCtx.currentTime, 0.1);
-            motorFiltro.frequency.setTargetAtTime(corteFiltro, audioCtx.currentTime, 0.12);
-            motorGain.gain.setTargetAtTime(volumen, audioCtx.currentTime, 0.12);
+            motorOsc.frequency.setTargetAtTime(freqBase, audioCtx.currentTime, 0.12); // *cambio 0.1 por 0.12
+            motorSubOsc.frequency.setTargetAtTime(freqArmonico, audioCtx.currentTime, 0.12); // *cambio 0.1 por 0.12
+            motorFiltro.frequency.setTargetAtTime(corteFiltro, audioCtx.currentTime, 0.14); // *cambio 0.12 por 0.14
+            motorGain.gain.setTargetAtTime(volumen, audioCtx.currentTime, 0.14); // *cambio 0.1 por 0.12
+
         }
 
         function tocarClaxonMaglev() {
@@ -572,7 +576,7 @@
                 const gain = audioCtx.createGain();
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(freq, ahora + idx * 0.09);
-                filtro.type = 'lowpass';
+                filtro.type = 'lowpass'; 
                 filtro.frequency.setValueAtTime(1100, ahora + idx * 0.09);
 
                 const tInicio = ahora + idx * 0.09;
@@ -968,7 +972,7 @@
             edificiosFondo = [];
             const paletaVentanas = ['#00f0ff', '#ff007f', '#ffe600', '#a855f7'];
             const paletaCarteles = ['#00f0ff', '#ff0055', '#39ff14', '#ffe600'];
-            const textosCartel = ['MAG-NET', 'CYBER-09', 'VOLT-X', 'NEO-HUB', 'PULSE', 'HYPER-7'];
+            const textosCartel = ['KRAKO CAFE', 'TURUTING CENTER', 'FRIKI MARKET', 'SET AIRLINES', 'HIG SPEED', 'MEGA CRANES'];
 
             for (let i = -50; i < 290; i++) {
                 const tieneCartel = Math.random() > 0.65;
@@ -986,9 +990,9 @@
             }
 
             tuneles = [
-                { id: 1, nombre: 'TÚNEL ALPHA', inicio: 6200, fin: 8200, color: '#00f0ff' },
-                { id: 2, nombre: 'TÚNEL PRISMA', inicio: 16600, fin: 19000, color: '#ff007f' },
-                { id: 3, nombre: 'TÚNEL VORTEX', inicio: 27000, fin: 29400, color: '#ffe600' }
+                { id: 1, nombre: 'TÚNEL SAN PORFIRIO ', inicio: 6200, fin: 8200, color: '#00f0ff' },
+                { id: 2, nombre: 'TÚNEL DE LA LIBERTAD', inicio: 16600, fin: 19000, color: '#ff007f' },
+                { id: 3, nombre: 'TÚNEL DE LA LUZ', inicio: 27000, fin: 29400, color: '#ffe600' }
             ];
 
             postesVia = [];
@@ -1232,7 +1236,7 @@
         // VISTA EXTERIOR: DIBUJO DE TRENES, TÚNELES, CIUDAD VIVA Y BARRA
         // =====================================================================
         function dibujarCabinaExterior(ctx, esDelanteraActiva) {
-            const colorCabina = modoExpreso ? '#ffe600' : '#ff007f';
+            const colorCabina = modoExpreso ? '#00008B' : '#F0F8FF'; // *  '#ffe600' : '#ff007f'
             ctx.fillStyle = '#07162c';
             ctx.strokeStyle = colorCabina;
             ctx.lineWidth = 3;
