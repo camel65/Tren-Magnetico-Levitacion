@@ -525,9 +525,9 @@
             }
             const velMaxRef = modoExpreso ? 920 : 750;
             const ratio = Math.min(1, velocidad / velMaxRef);
-            const freqBase = 55 + ratio * (modoExpreso ? 76 : 62); // *cambio 42 por 44 y 88 : 72 por 76 : 62
+            const freqBase = 44 + ratio * (modoExpreso ? 76 : 62); // *cambio 42 por 44 y 88 : 72 por 76 : 62
             const freqArmonico = frenando ? freqBase * 1.2 : freqBase * 1.5; // * cambio 1.25 por 1.2
-            const corteFiltro = 160 + ratio * 240; // *cambio 160 por 150 y 240 por 210
+            const corteFiltro = 150 + ratio * 210; // *cambio 160 por 150 y 240 por 210
             
            const baseVol = vistaCabina ? 0.11 : 0.14; // *añadido nuevo         
            const volumen = Math.min(0.18, baseVol * (0.35 + ratio * 0.65));
